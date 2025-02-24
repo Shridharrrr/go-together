@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { db, auth } from "@/config/firebase";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, getDoc, doc } from "firebase/firestore";
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
@@ -78,7 +78,7 @@ export default function CreateRide() {
     }
 
     try {
-      // Fetch user details from Firestore
+  
       const userRef = collection(db, "userInfo");
       const userDoc = await getDoc(doc(userRef, user.uid));
   
@@ -87,9 +87,9 @@ export default function CreateRide() {
         return;
       }
   
-      const userInfo = userDoc.data(); // Get user details
-  
-      // Add ride data to Firestore
+      const userInfo = userDoc.data();
+      
+      
       await addDoc(collection(db, "availableRides"), {
         from,
         to,
@@ -99,10 +99,10 @@ export default function CreateRide() {
         driverId: user.uid,
         fromCoords: fromPosition,
         toCoords: toPosition,
-        driverName: userInfo.firstname + userInfo.lastname, // Add user details
+        driverName: userInfo.firstname +""+ userInfo.lastname, // Add user details
         driverPhone: userInfo.phone, 
-        driverGender: user.gender,
-        driverAge: user.age,
+        driverGender: userInfo.gender,
+        driverAge: userInfo.age,
       });
   
       alert("Ride created successfully!");
