@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { db, auth } from "@/config/firebase"; // Import auth
 import { collection, addDoc } from "firebase/firestore";
+import LocationInput from "@/components/LocationInput";
 
 export default function CreateRide() {
   const [pickup, setPickup] = useState("");
