@@ -78,6 +78,18 @@ export default function CreateRide() {
     }
 
     try {
+      // Fetch user details from Firestore
+      const userRef = collection(db, "userInfo");
+      const userDoc = await getDoc(doc(userRef, user.uid));
+  
+      if (!userDoc.exists()) {
+        alert("User info not found!");
+        return;
+      }
+  
+      const userInfo = userDoc.data(); // Get user details
+  
+      // Add ride data to Firestore
       await addDoc(collection(db, "availableRides"), {
         from,
         to,
@@ -87,8 +99,12 @@ export default function CreateRide() {
         driverId: user.uid,
         fromCoords: fromPosition,
         toCoords: toPosition,
+        driverName: userInfo.firstname + userInfo.lastname, // Add user details
+        driverPhone: userInfo.phone, 
+        driverGender: user.gender,
+        driverAge: user.age,
       });
-
+  
       alert("Ride created successfully!");
       setFrom("");
       setTo("");
