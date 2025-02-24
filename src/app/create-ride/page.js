@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { db, auth } from "@/config/firebase";
 import { collection, addDoc } from "firebase/firestore";
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet";
@@ -27,6 +27,7 @@ export default function CreateRide() {
   const [toSuggestions, setToSuggestions] = useState([]);
   const [fromPosition, setFromPosition] = useState(null);
   const [toPosition, setToPosition] = useState(null);
+  const [routeCoords, setRouteCoords] = useState([]);
 
   const fetchSuggestions = async (query, setSuggestions) => {
     if (query.length > 2) {
@@ -45,6 +46,22 @@ export default function CreateRide() {
     setPosition([parseFloat(place.lat), parseFloat(place.lon)]);
     setSuggestions([]);
   };
+
+  const fetchRoute = async () => {
+    if (fromPosition && toPosition) {
+      const res = await fetch(
+        `https://router.project-osrm.org/route/v1/driving/${fromPosition[1]},${fromPosition[0]};${toPosition[1]},${toPosition[0]}?overview=full&geometries=geojson`
+      );
+      const data = await res.json();
+      if (data.routes && data.routes.length > 0) {
+        setRouteCoords(data.routes[0].geometry.coordinates.map(([lon, lat]) => [lat, lon]));
+      }
+    }
+  };
+
+  useEffect(() => {
+    fetchRoute();
+  }, [fromPosition, toPosition]);
 
   const handleCreateRide = async (e) => {
     e.preventDefault();
@@ -80,6 +97,7 @@ export default function CreateRide() {
       setSeats("");
       setFromPosition(null);
       setToPosition(null);
+      setRouteCoords([]);
     } catch (error) {
       console.error("Error creating ride:", error);
       alert("Failed to create ride. Try again!");
@@ -116,7 +134,7 @@ export default function CreateRide() {
               </ul>
             )}
           </div>
-          
+
           <div className="relative">
             <input
               type="text"
@@ -142,12 +160,20 @@ export default function CreateRide() {
               </ul>
             )}
           </div>
-          
+
           <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="p-2 border rounded" />
           <input type="time" value={time} onChange={(e) => setTime(e.target.value)} className="p-2 border rounded" />
-          <input type="number" placeholder="Available Seats" value={seats} onChange={(e) => setSeats(e.target.value)} className="p-2 border rounded" />
+          <input
+            type="number"
+            placeholder="Available Seats"
+            value={seats}
+            onChange={(e) => setSeats(e.target.value)}
+            className="p-2 border rounded"
+          />
 
-          <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">Create Ride</button>
+          <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
+            Create Ride
+          </button>
         </form>
       </div>
       <div className="w-1/2 h-full">
@@ -163,9 +189,7 @@ export default function CreateRide() {
               <Popup>Destination</Popup>
             </Marker>
           )}
-          {fromPosition && toPosition && (
-            <Polyline positions={[fromPosition, toPosition]} color="blue" />
-          )}
+          {routeCoords.length > 0 && <Polyline positions={routeCoords} color="blue" />}
         </MapContainer>
       </div>
     </div>
