@@ -1,8 +1,9 @@
 "use client";
 import { useState, useEffect } from "react";
 import { db } from "@/config/firebase";
-import { collection, getDocs } from "firebase/firestore";
-import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet";
+import { collection, getDocs, addDoc, doc, updateDoc } from "firebase/firestore";
+import { useAuth } from "@/context/AuthContext"; 
+import { MapContainer, TileLayer, Marker, Polyline } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import markerIconPng from "leaflet/dist/images/marker-icon.png";
@@ -18,6 +19,7 @@ const customMarkerIcon = new L.Icon({
 });
 
 export default function FindRide() {
+  const { currentUser } = useAuth();
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [fromSuggestions, setFromSuggestions] = useState([]);
@@ -26,6 +28,7 @@ export default function FindRide() {
   const [toPosition, setToPosition] = useState(null);
   const [routeCoords, setRouteCoords] = useState([]);
   const [availableRides, setAvailableRides] = useState([]);
+  const [requestedRides, setRequestedRides] = useState({});
 
   const fetchSuggestions = async (query, setSuggestions) => {
     if (query.length > 2) {
@@ -73,7 +76,53 @@ export default function FindRide() {
         })
       );
     });
+
     setAvailableRides(matchingRides);
+  };
+
+  const requestRide = async (ride) => {
+    if (!currentUser) {
+      alert("Please log in to request a ride.");
+      return;
+    }
+
+    if (ride.availableSeats <= 0) {
+      alert("This ride is already full.");
+      return;
+    }
+
+    try {
+      await addDoc(collection(db, "rideRequests"), {
+        requesterId: currentUser.uid,
+        requesterName: currentUser.displayName || "Unknown",
+        driverId: ride.driverId,
+        driverName: ride.driverName,
+        pickup: ride.from,
+        drop: ride.to,
+        date: ride.date,
+        time: ride.time,
+        status: "Pending",
+      });
+
+      // Disable button after requesting
+      setRequestedRides((prev) => ({ ...prev, [ride.id]: true }));
+
+      // Reduce available seats count
+      const rideRef = doc(db, "availableRides", ride.id);
+      await updateDoc(rideRef, { seats: ride.seats - 1 });
+
+      // Update local state
+      setAvailableRides((prevRides) =>
+        prevRides.map((r) =>
+          r.id === ride.id ? { ...r, seats: r.seats - 1 } : r
+        )
+      );
+
+      alert("Ride request sent successfully!");
+    } catch (err) {
+      console.error("Error requesting ride:", err);
+      alert("Failed to request ride.");
+    }
   };
 
   useEffect(() => {
@@ -84,6 +133,8 @@ export default function FindRide() {
     <div className="h-screen flex p-4">
       <div className="w-1/2 flex flex-col items-center p-4">
         <h2 className="text-xl font-bold mb-4">Find a Ride</h2>
+
+        {/* From Input */}
         <div className="relative w-80">
           <input
             type="text"
@@ -110,6 +161,7 @@ export default function FindRide() {
           )}
         </div>
 
+        {/* To Input */}
         <div className="relative w-80 mt-4">
           <input
             type="text"
@@ -136,29 +188,35 @@ export default function FindRide() {
           )}
         </div>
 
+        {/* Matching Rides */}
         <h3 className="mt-6 font-semibold">Matching Rides:</h3>
         <ul>
-        {availableRides.length > 0 ? (
+          {availableRides.length > 0 ? (
             availableRides.map((ride) => (
               <div key={ride.id} className="border p-4 rounded shadow-md mb-4">
                 <h4 className="font-bold">{ride.from} → {ride.to}</h4>
                 <p>Date: {ride.date} | Time: {ride.time}</p>
-                {ride.driverId && (
-                  <div className="mt-2 p-2 border rounded">
-                    <h5 className="font-semibold">Driver: {ride.driverName}</h5>
-                    <p>Phone: {ride.driverPhone}</p>
-                    <p>Gender: {ride.driverGender}</p>
-                    <p>Age: {ride.driverAge}</p>
-                  </div>
-                )}
+                <p>Seats Available: {ride.seats}</p>
+
+                {/* Book Ride Button */}
+                <button
+                  onClick={() => requestRide(ride)}
+                  className={`mt-2 px-4 py-2 rounded text-white ${
+                    requestedRides[ride.id] || ride.seats <= 0
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-blue-500 hover:bg-blue-600"
+                  }`}
+                  disabled={requestedRides[ride.id] || ride.seats <= 0}
+                >
+                  {requestedRides[ride.id] ? "Request Sent" : "Book Ride"}
+                </button>
               </div>
             ))
           ) : (
             <p>No matching rides found.</p>
           )}
         </ul>
-      </div>
-
+        </div>
       <div className="w-1/2 h-full">
         <MapContainer center={[20.5937, 78.9629]} zoom={6} className="w-full h-full rounded-lg border">
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
