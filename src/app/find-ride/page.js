@@ -94,7 +94,7 @@ export default function FindRide() {
     try {
       await addDoc(collection(db, "rideRequests"), {
         requesterId: currentUser.uid,
-        requesterName: currentUser.displayName || "Unknown",
+        requesterName: currentUser.firstname +" "+ currentUser.lastname || "Unknown",
         driverId: ride.driverId,
         driverName: ride.driverName,
         pickup: ride.from,
