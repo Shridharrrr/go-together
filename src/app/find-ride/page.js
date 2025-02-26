@@ -1,14 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
-import { db } from "@/config/firebase";
-import {
-  collection,
-  getDocs,
-  addDoc,
-  doc,
-  updateDoc,
-} from "firebase/firestore";
 import { useAuth } from "@/context/AuthContext";
+import { fetchAvailableRides, requestRide } from "@/services/firebaseService";
 import { MapContainer, TileLayer, Marker, Polyline } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
@@ -37,7 +30,6 @@ export default function FindRide() {
   const [requestedRides, setRequestedRides] = useState({});
 
   const fetchSuggestions = async (query, setSuggestions) => {
-    console.log(currentUser);
     if (query.length > 2) {
       const res = await fetch(
         `https://nominatim.openstreetmap.org/search?format=json&q=${query}`
@@ -73,76 +65,22 @@ export default function FindRide() {
   };
 
   const findMatchingRides = async (route) => {
-    const ridesSnapshot = await getDocs(collection(db, "availableRides"));
-    const rides = ridesSnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-
-    const matchingRides = rides.filter((ride) => {
-      return (
-        ride.fromCoords &&
-        ride.toCoords &&
-        route.some((coord) => {
-          return (
-            Math.abs(coord[0] - ride.fromCoords[0]) < 0.05 &&
-            Math.abs(coord[1] - ride.fromCoords[1]) < 0.05
-          );
-        })
-      );
-    });
-
+    const matchingRides = await fetchAvailableRides();
     setAvailableRides(matchingRides);
   };
 
-  const requestRide = async (ride) => {
-    if (!currentUser) {
-      alert("Please log in to request a ride.");
-      return;
-    }
-
-    // Check if the current user is the driver of the ride
-    if (ride.driverId === currentUser.uid) {
-      alert("You cannot request a ride from yourself.");
-      return;
-    }
-
-    if (ride.availableSeats <= 0) {
-      alert("This ride is already full.");
-      return;
-    }
-
+  const handleRequestRide = async (ride) => {
     try {
-      await addDoc(collection(db, "rideRequests"), {
-        driverId: ride.driverId,
-        driverName: ride.driverName,
-        requesterId: currentUser.uid,
-        requesterName: currentUser.displayName || "Unknown",
-        pickup: ride.from,
-        drop: ride.to,
-        date: ride.date,
-        time: ride.time,
-        status: "Pending",
-      });
-
-      // Disable button after requesting
+      await requestRide(ride, currentUser);
       setRequestedRides((prev) => ({ ...prev, [ride.id]: true }));
-
-      // Reduce available seats count
-      const rideRef = doc(db, "availableRides", ride.id);
-      await updateDoc(rideRef, { seats: ride.seats - 1 });
-
-      // Update local state
       setAvailableRides((prevRides) =>
         prevRides.map((r) =>
           r.id === ride.id ? { ...r, seats: r.seats - 1 } : r
         )
       );
-
-      alert("Ride request sent successfully!");
+      alert("Ride request sent!");
     } catch (err) {
-      console.error("Error requesting ride:", err);
-      alert("Failed to request ride.");
+      alert(err.message);
     }
   };
 
@@ -155,7 +93,6 @@ export default function FindRide() {
       <div className="w-1/2 flex flex-col items-center p-4">
         <h2 className="text-xl font-bold mb-4">Find a Ride</h2>
 
-        {/* From Input */}
         <div className="relative w-80">
           <input
             type="text"
@@ -173,12 +110,7 @@ export default function FindRide() {
                 <li
                   key={place.place_id}
                   onClick={() =>
-                    handleSelect(
-                      place,
-                      setFrom,
-                      setFromPosition,
-                      setFromSuggestions
-                    )
+                    handleSelect(place, setFrom, setFromPosition, setFromSuggestions)
                   }
                   className="p-2 hover:bg-gray-200 cursor-pointer"
                 >
@@ -189,7 +121,6 @@ export default function FindRide() {
           )}
         </div>
 
-        {/* To Input */}
         <div className="relative w-80 mt-4">
           <input
             type="text"
@@ -218,35 +149,25 @@ export default function FindRide() {
           )}
         </div>
 
-        {/* Matching Rides */}
         <h3 className="mt-6 font-semibold">Matching Rides:</h3>
         <ul>
           {availableRides.length > 0 ? (
             availableRides.map((ride) => (
               <div key={ride.id} className="border p-4 rounded shadow-md mb-4">
-                <h4 className="font-bold">
-                  {ride.from} → {ride.to}
-                </h4>
-                <p>
-                  Date: {ride.date} | Time: {ride.time}
-                </p>
+                <h4 className="font-bold">{ride.from} → {ride.to}</h4>
+                <p>Date: {ride.date} | Time: {ride.time}</p>
                 <p>Seats Available: {ride.seats}</p>
 
-                {/* Book Ride Button */}
                 <button
-                  onClick={() => requestRide(ride)}
+                  onClick={() => handleRequestRide(ride)}
                   className={`mt-2 px-4 py-2 rounded text-white ${
-                    requestedRides[ride.id] ||
-                    ride.seats <= 0 ||
+                    requestedRides[ride.id] || ride.seats  <= 0 ||
                     ride.driverId === currentUser?.uid
                       ? "bg-gray-400 cursor-not-allowed"
                       : "bg-blue-500 hover:bg-blue-600"
                   }`}
-                  disabled={
-                    requestedRides[ride.id] ||
-                    ride.seats <= 0 ||
-                    ride.driverId === currentUser?.uid
-                  }
+                  disabled={requestedRides[ride.id] || ride.seats <= 0 ||
+                    ride.driverId === currentUser?.uid}
                 >
                   {requestedRides[ride.id] ? "Request Sent" : "Book Ride"}
                 </button>
@@ -257,6 +178,7 @@ export default function FindRide() {
           )}
         </ul>
       </div>
+
       <div className="w-1/2 h-full">
         <MapContainer
           center={[20.5937, 78.9629]}
@@ -264,15 +186,9 @@ export default function FindRide() {
           className="w-full h-full rounded-lg border"
         >
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-          {fromPosition && (
-            <Marker position={fromPosition} icon={customMarkerIcon} />
-          )}
-          {toPosition && (
-            <Marker position={toPosition} icon={customMarkerIcon} />
-          )}
-          {routeCoords.length > 0 && (
-            <Polyline positions={routeCoords} color="blue" />
-          )}
+          {fromPosition && <Marker position={fromPosition} icon={customMarkerIcon} />}
+          {toPosition && <Marker position={toPosition} icon={customMarkerIcon} />}
+          {routeCoords.length > 0 && <Polyline positions={routeCoords} color="blue" />}
         </MapContainer>
       </div>
     </div>

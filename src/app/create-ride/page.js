@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { db, auth } from "@/config/firebase";
-import { collection, addDoc, getDoc, doc } from "firebase/firestore";
+import { fetchSuggestions, fetchRoute, handleCreateRide } from "@/services/firebaseService";
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
@@ -29,102 +28,48 @@ export default function CreateRide() {
   const [toPosition, setToPosition] = useState(null);
   const [routeCoords, setRouteCoords] = useState([]);
 
-  const fetchSuggestions = async (query, setSuggestions) => {
-    if (query.length > 2) {
-      const res = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${query}`
-      );
-      const data = await res.json();
-      setSuggestions(data);
-    } else {
-      setSuggestions([]);
-    }
-  };
-
   const handleSelect = (place, setLocation, setPosition, setSuggestions) => {
     setLocation(place.display_name);
     setPosition([parseFloat(place.lat), parseFloat(place.lon)]);
     setSuggestions([]);
   };
 
-  const fetchRoute = async () => {
-    if (fromPosition && toPosition) {
-      const res = await fetch(
-        `https://router.project-osrm.org/route/v1/driving/${fromPosition[1]},${fromPosition[0]};${toPosition[1]},${toPosition[0]}?overview=full&geometries=geojson`
-      );
-      const data = await res.json();
-      if (data.routes && data.routes.length > 0) {
-        setRouteCoords(data.routes[0].geometry.coordinates.map(([lon, lat]) => [lat, lon]));
-      }
-    }
-  };
-
   useEffect(() => {
-    fetchRoute();
+    if (fromPosition && toPosition) {
+      const getRoute = async () => {
+        try {
+          const route = await fetchRoute(fromPosition, toPosition);
+          setRouteCoords(route);
+        } catch (error) {
+          console.error("Error fetching route:", error);
+        }
+      };
+      getRoute();
+    }
   }, [fromPosition, toPosition]);
-
-  const handleCreateRide = async (e) => {
-    e.preventDefault();
-
-    if (!from || !to || !date || !time || !seats) {
-      alert("Please fill all fields!");
-      return;
-    }
-
-    const user = auth.currentUser;
-    if (!user) {
-      alert("User not logged in!");
-      return;
-    }
-
-    try {
-  
-      const userRef = collection(db, "userInfo");
-      const userDoc = await getDoc(doc(userRef, user.uid));
-  
-      if (!userDoc.exists()) {
-        alert("User info not found!");
-        return;
-      }
-  
-      const userInfo = userDoc.data();
-      
-      
-      await addDoc(collection(db, "availableRides"), {
-        from,
-        to,
-        date,
-        time,
-        seats: parseInt(seats),
-        driverId: user.uid,
-        fromCoords: fromPosition,
-        toCoords: toPosition,
-        driverName: userInfo.firstname +""+ userInfo.lastname, // Add user details
-        driverPhone: userInfo.phone, 
-        driverGender: userInfo.gender,
-        driverAge: userInfo.age,
-      });
-  
-      alert("Ride created successfully!");
-      setFrom("");
-      setTo("");
-      setDate("");
-      setTime("");
-      setSeats("");
-      setFromPosition(null);
-      setToPosition(null);
-      setRouteCoords([]);
-    } catch (error) {
-      console.error("Error creating ride:", error);
-      alert("Failed to create ride. Try again!");
-    }
-  };
 
   return (
     <div className="h-screen flex p-4">
       <div className="w-1/2 flex flex-col items-center p-4">
         <h2 className="text-xl font-bold mb-4">Create a Ride</h2>
-        <form onSubmit={handleCreateRide} className="flex flex-col space-y-4 w-80">
+        <form onSubmit={(e) => handleCreateRide(
+      e,
+      from,
+      to,
+      date,
+      time,
+      seats,
+      fromPosition,
+      toPosition,
+      setFrom,
+      setTo,
+      setDate,
+      setTime,
+      setSeats,
+      setFromPosition,
+      setToPosition,
+      setRouteCoords
+    )} className="flex flex-col space-y-4 w-80">
           <div className="relative">
             <input
               type="text"
@@ -211,4 +156,3 @@ export default function CreateRide() {
     </div>
   );
 }
-
