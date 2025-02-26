@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { db } from "@/config/firebase"
 import { collection, getDocs, addDoc } from "firebase/firestore"
-import { useAuth } from "@/context/AuthContext" // Assuming you have an Auth Context
+import { useAuth } from "@/context/AuthContext"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { ArrowRight, User } from "lucide-react"
@@ -12,7 +12,8 @@ const AvailableRides = () => {
   const [rideDetails, setRideDetails] = useState([])
   const [userDetails, setUserDetails] = useState([])
   const [showDriverInfo, setShowDriverInfo] = useState({})
-  const { currentUser } = useAuth() // Get logged-in user
+  const [requestedRides, setRequestedRides] = useState({})
+  const { currentUser } = useAuth()
 
   useEffect(() => {
     const getDetails = async () => {
@@ -40,6 +41,11 @@ const AvailableRides = () => {
       return
     }
 
+    if (currentUser.uid === ride.driverId) {
+      alert("You cannot request your own ride.")
+      return
+    }
+
     const driver = userDetails.find((user) => user.uid === ride.driverId)
 
     if (!driver) {
@@ -57,9 +63,10 @@ const AvailableRides = () => {
         drop: ride.to,
         date: ride.date,
         time: ride.time,
-        status: "Pending" // Status can be "Accepted" or "Rejected"
+        status: "Pending"
       })
 
+      setRequestedRides((prev) => ({ ...prev, [ride.id]: true }))
       alert("Ride request sent successfully!")
     } catch (err) {
       console.error("Error requesting ride:", err)
@@ -75,6 +82,7 @@ const AvailableRides = () => {
     <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {rideDetails.map((ride) => {
         const driver = userDetails.find((user) => user.uid === ride.driverId)
+        const isDriver = currentUser?.uid === ride.driverId
 
         return (
           <Card key={ride.id} className="w-full">
@@ -106,16 +114,15 @@ const AvailableRides = () => {
               )}
             </CardContent>
             <CardFooter className="flex justify-between">
-              <Button variant="default" onClick={() => requestRide(ride)}>Request Ride</Button>
+              <Button 
+                variant="default" 
+                onClick={() => requestRide(ride)} 
+                disabled={requestedRides[ride.id] || isDriver}
+              >
+                {isDriver ? "Your Ride" : requestedRides[ride.id] ? "Requested" : "Request Ride"}
+              </Button>
               <Button variant="outline" onClick={() => toggleDriverInfo(ride.id)}>
-                {showDriverInfo[ride.id] ? (
-                  <>Ride Info</>
-                ) : (
-                  <>
-                    <User className="mr-2 h-4 w-4" />
-                    Driver Info
-                  </>
-                )}
+                {showDriverInfo[ride.id] ? "Ride Info" : <><User className="mr-2 h-4 w-4" /> Driver Info</>}
               </Button>
             </CardFooter>
           </Card>
@@ -125,4 +132,6 @@ const AvailableRides = () => {
   )
 }
 
-export default AvailableRides
+export default AvailableRides;
+
+

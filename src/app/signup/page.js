@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { auth, db } from "@/config/firebase";
 import "react-phone-input-2/lib/style.css";
 import PhoneInput from "react-phone-input-2";
@@ -29,87 +29,40 @@ export default function SignUpPage() {
     setUser((prevUser) => ({ ...prevUser, [name]: value }));
   };
 
-  const isValidPassword = (password) => {
-    return password.length >= 6 && /\d/.test(password);
-  };
+  const isValidPassword = (password) => password.length >= 6 && /\d/.test(password);
 
-  const validateEmail = (email) => {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  };
+  const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   const nextStep = () => {
-    if (
-      (step === 1 && !user.email) ||
-      (step === 2 && (!user.firstname || !user.lastname)) ||
-      (step === 3 && !user.age) ||
-      (step === 4 && !user.gender) ||
-      (step === 5 && !user.password) ||
-      (step === 6 && !user.phone)
-    ) {
-      setError("Please fill in all required fields.");
-      return;
-    }
-    if (step === 1 && !validateEmail(user.email)) {
-      setError("Please enter a valid email.");
-      return;
-    }
-    if (step === 5 && !isValidPassword(user.password)) {
-      setError(
-        "Password must be at least 6 characters long and contain a number."
-      );
-      return;
-    }
+    if (!user.email && step === 1) return setError("Please enter your email.");
+    if (!validateEmail(user.email) && step === 1) return setError("Invalid email format.");
+    if ((!user.firstname || !user.lastname) && step === 2) return setError("Enter your full name.");
+    if (!user.age && step === 3) return setError("Enter your age.");
+    if (!user.gender && step === 4) return setError("Select your gender.");
+    if (!isValidPassword(user.password) && step === 5) return setError("Password must be at least 6 characters long and contain a number.");
+    if (!user.phone && step === 6) return setError("Enter your phone number.");
+    
     setError("");
     setStep(step + 1);
   };
 
-  const prevStep = () => {
-    setStep(step - 1);
-  };
+  const prevStep = () => setStep(step - 1);
 
   const handleSignup = async (e) => {
     e.preventDefault();
-
-    if (
-      !user.email ||
-      !user.password ||
-      !user.phone ||
-      !user.firstname ||
-      !user.lastname
-    ) {
-      setError("Please fill all required fields.");
-      return;
-    }
-
     setIsLoading(true);
+
     try {
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        user.email,
-        user.password
-      );
-      const newUser = userCredential.user; // Get the newly created user
-      const userId = newUser.uid; // Get user UID
-
-      // Save user details in Firestore with UID
-      await setDoc(doc(db, "userInfo", userId), {
-        uid: userId, // Save UID
-        firstname: user.firstname,
-        lastname: user.lastname,
-        age: user.age,
-        gender: user.gender,
-        phone: user.phone,
-      });
-
+      const userCredential = await createUserWithEmailAndPassword(auth, user.email, user.password);
+      const newUser = userCredential.user;
+      await updateProfile(newUser, { displayName: `${user.firstname} ${user.lastname}` });
+      await setDoc(doc(db, "userInfo", newUser.uid), { ...user, uid: newUser.uid });
+      
       router.push("/find-ride");
     } catch (err) {
-      console.error(err);
       setError(err.message);
       setIsLoading(false);
-      return;
     }
-
-    setIsLoading(false);
   };
   return (
     <div className="flex flex-col items-center gap-6 p-6 max-w-md mx-auto">

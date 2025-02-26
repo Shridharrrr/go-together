@@ -1,8 +1,14 @@
 "use client";
 import { useState, useEffect } from "react";
 import { db } from "@/config/firebase";
-import { collection, getDocs, addDoc, doc, updateDoc } from "firebase/firestore";
-import { useAuth } from "@/context/AuthContext"; 
+import {
+  collection,
+  getDocs,
+  addDoc,
+  doc,
+  updateDoc,
+} from "firebase/firestore";
+import { useAuth } from "@/context/AuthContext";
 import { MapContainer, TileLayer, Marker, Polyline } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
@@ -31,8 +37,11 @@ export default function FindRide() {
   const [requestedRides, setRequestedRides] = useState({});
 
   const fetchSuggestions = async (query, setSuggestions) => {
+    console.log(currentUser);
     if (query.length > 2) {
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}`);
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${query}`
+      );
       const data = await res.json();
       setSuggestions(data);
     } else {
@@ -53,7 +62,10 @@ export default function FindRide() {
       );
       const data = await res.json();
       if (data.routes && data.routes.length > 0) {
-        const coords = data.routes[0].geometry.coordinates.map(([lon, lat]) => [lat, lon]);
+        const coords = data.routes[0].geometry.coordinates.map(([lon, lat]) => [
+          lat,
+          lon,
+        ]);
         setRouteCoords(coords);
         findMatchingRides(coords);
       }
@@ -62,7 +74,10 @@ export default function FindRide() {
 
   const findMatchingRides = async (route) => {
     const ridesSnapshot = await getDocs(collection(db, "availableRides"));
-    const rides = ridesSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    const rides = ridesSnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
 
     const matchingRides = rides.filter((ride) => {
       return (
@@ -86,6 +101,12 @@ export default function FindRide() {
       return;
     }
 
+    // Check if the current user is the driver of the ride
+    if (ride.driverId === currentUser.uid) {
+      alert("You cannot request a ride from yourself.");
+      return;
+    }
+
     if (ride.availableSeats <= 0) {
       alert("This ride is already full.");
       return;
@@ -93,10 +114,10 @@ export default function FindRide() {
 
     try {
       await addDoc(collection(db, "rideRequests"), {
-        requesterId: currentUser.uid,
-        requesterName: currentUser.firstname +" "+ currentUser.lastname || "Unknown",
         driverId: ride.driverId,
         driverName: ride.driverName,
+        requesterId: currentUser.uid,
+        requesterName: currentUser.displayName || "Unknown",
         pickup: ride.from,
         drop: ride.to,
         date: ride.date,
@@ -151,7 +172,14 @@ export default function FindRide() {
               {fromSuggestions.map((place) => (
                 <li
                   key={place.place_id}
-                  onClick={() => handleSelect(place, setFrom, setFromPosition, setFromSuggestions)}
+                  onClick={() =>
+                    handleSelect(
+                      place,
+                      setFrom,
+                      setFromPosition,
+                      setFromSuggestions
+                    )
+                  }
                   className="p-2 hover:bg-gray-200 cursor-pointer"
                 >
                   {place.display_name}
@@ -178,7 +206,9 @@ export default function FindRide() {
               {toSuggestions.map((place) => (
                 <li
                   key={place.place_id}
-                  onClick={() => handleSelect(place, setTo, setToPosition, setToSuggestions)}
+                  onClick={() =>
+                    handleSelect(place, setTo, setToPosition, setToSuggestions)
+                  }
                   className="p-2 hover:bg-gray-200 cursor-pointer"
                 >
                   {place.display_name}
@@ -194,19 +224,29 @@ export default function FindRide() {
           {availableRides.length > 0 ? (
             availableRides.map((ride) => (
               <div key={ride.id} className="border p-4 rounded shadow-md mb-4">
-                <h4 className="font-bold">{ride.from} → {ride.to}</h4>
-                <p>Date: {ride.date} | Time: {ride.time}</p>
+                <h4 className="font-bold">
+                  {ride.from} → {ride.to}
+                </h4>
+                <p>
+                  Date: {ride.date} | Time: {ride.time}
+                </p>
                 <p>Seats Available: {ride.seats}</p>
 
                 {/* Book Ride Button */}
                 <button
                   onClick={() => requestRide(ride)}
                   className={`mt-2 px-4 py-2 rounded text-white ${
-                    requestedRides[ride.id] || ride.seats <= 0
+                    requestedRides[ride.id] ||
+                    ride.seats <= 0 ||
+                    ride.driverId === currentUser?.uid
                       ? "bg-gray-400 cursor-not-allowed"
                       : "bg-blue-500 hover:bg-blue-600"
                   }`}
-                  disabled={requestedRides[ride.id] || ride.seats <= 0}
+                  disabled={
+                    requestedRides[ride.id] ||
+                    ride.seats <= 0 ||
+                    ride.driverId === currentUser?.uid
+                  }
                 >
                   {requestedRides[ride.id] ? "Request Sent" : "Book Ride"}
                 </button>
@@ -216,13 +256,23 @@ export default function FindRide() {
             <p>No matching rides found.</p>
           )}
         </ul>
-        </div>
+      </div>
       <div className="w-1/2 h-full">
-        <MapContainer center={[20.5937, 78.9629]} zoom={6} className="w-full h-full rounded-lg border">
+        <MapContainer
+          center={[20.5937, 78.9629]}
+          zoom={6}
+          className="w-full h-full rounded-lg border"
+        >
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-          {fromPosition && <Marker position={fromPosition} icon={customMarkerIcon} />} 
-          {toPosition && <Marker position={toPosition} icon={customMarkerIcon} />} 
-          {routeCoords.length > 0 && <Polyline positions={routeCoords} color="blue" />}
+          {fromPosition && (
+            <Marker position={fromPosition} icon={customMarkerIcon} />
+          )}
+          {toPosition && (
+            <Marker position={toPosition} icon={customMarkerIcon} />
+          )}
+          {routeCoords.length > 0 && (
+            <Polyline positions={routeCoords} color="blue" />
+          )}
         </MapContainer>
       </div>
     </div>
