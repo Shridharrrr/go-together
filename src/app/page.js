@@ -73,12 +73,6 @@ export default function FindRide() {
     try {
       await requestRide(ride, currentUser);
       setRequestedRides((prev) => ({ ...prev, [ride.id]: true }));
-      setAvailableRides((prevRides) =>
-        prevRides.map((r) =>
-          r.id === ride.id ? { ...r, seats: r.seats - 1 } : r
-        )
-      );
-      alert("Ride request sent!");
     } catch (err) {
       alert(err.message);
     }
