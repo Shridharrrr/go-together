@@ -1,10 +1,15 @@
 import { NextResponse } from "next/server";
 
 export function middleware(req) {
-    const token = req.cookies.get("token"); 
-    const protectedRoutes = ["/create-ride", "/my-rides", "/my-requests", "/available-rides"]; 
+    console.log("Cookies received in middleware:", req.cookies); // Debugging log
+
+    const token = req.cookies.get("token")?.value; 
+    console.log("Extracted Token:", token); // Debugging log
+
+    const protectedRoutes = ["/create-ride", "/my-rides", "/my-requests", "/available-rides"];
 
     if (protectedRoutes.includes(req.nextUrl.pathname) && !token) {
+        console.log("Unauthorized access. Redirecting to login...");
         return NextResponse.redirect(new URL("/login", req.url));
     }
 
@@ -14,3 +19,5 @@ export function middleware(req) {
 export const config = {
     matcher: ["/create-ride", "/my-rides", "/my-requests", "/available-rides"],
 };
+
+

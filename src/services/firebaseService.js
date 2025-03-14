@@ -1,5 +1,12 @@
 import { db, auth } from "@/config/firebase";
-import { collection, getDocs, getDoc, addDoc, doc, updateDoc } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  getDoc,
+  addDoc,
+  doc,
+  updateDoc,
+} from "firebase/firestore";
 
 export const fetchUserInfo = async () => {
   try {
@@ -111,12 +118,10 @@ export const handleCreateRide = async (
   }
 };
 
-
 export const fetchAvailableRides = async () => {
   const ridesSnapshot = await getDocs(collection(db, "availableRides"));
   return ridesSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 };
-
 
 export const findMatchingRides = async (route) => {
   const rides = await fetchAvailableRides();
@@ -131,29 +136,34 @@ export const findMatchingRides = async (route) => {
 };
 
 export const requestRide = async (ride, user) => {
-  if (!user) throw new Error("User not logged in");
+  if (!user) {
+    return Promise.reject(new Error("Log in first to book the ride"));
+  }
 
-  if (ride.driverId === user.uid) throw new Error("You cannot request your own ride");
+  if (ride.driverId === user.uid) {
+    throw new Error("You cannot request your own ride");
+  }
 
-  //if (ride.seats <= 0) throw new Error("No seats available");
+  try {
+    await addDoc(collection(db, "rideRequests"), {
+      driverId: ride.driverId,
+      driverName: ride.driverName,
+      requesterId: user.uid,
+      requesterName: user.displayName || "Unknown",
+      pickup: ride.from,
+      drop: ride.to,
+      date: ride.date,
+      time: ride.time,
+      status: "Pending",
+    });
 
-  await addDoc(collection(db, "rideRequests"), {
-    driverId: ride.driverId,
-    driverName: ride.driverName,
-    requesterId: user.uid,
-    requesterName: user.displayName || "Unknown",
-    pickup: ride.from,
-    drop: ride.to,
-    date: ride.date,
-    time: ride.time,
-    status: "Pending",
-  });
-
-
-  //const rideRef = doc(db, "availableRides", ride.id);
-  //await updateDoc(rideRef, { seats: ride.seats - 1 });
-  alert("Ride request sent")
-  return { success: true};
+    alert("Ride request sent");
+    return { success: true };
+  } catch (error) {
+    console.error("Error requesting ride:", error);
+    alert("Failed to request ride. Please try again.");
+    return { success: false, error };
+  }
 };
 
 
