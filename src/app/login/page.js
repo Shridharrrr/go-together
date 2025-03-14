@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/config/firebase";
 import Link from "next/link";
+import { setCookie } from "cookies-next";
 
 export default function LoginPage() {
     const [user, setUser] = useState({ email: "", password: "" });
@@ -25,7 +26,11 @@ export default function LoginPage() {
         setError("");
 
         try {
-            await signInWithEmailAndPassword(auth, email, password);
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const token = await userCredential.user.getIdToken();
+    
+            setCookie("token", token, { path: "/" });
+    
             router.push("/find-ride");
         } catch (err) {
             console.error(err);
