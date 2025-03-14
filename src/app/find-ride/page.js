@@ -73,12 +73,6 @@ export default function FindRide() {
     try {
       await requestRide(ride, currentUser);
       setRequestedRides((prev) => ({ ...prev, [ride.id]: true }));
-      setAvailableRides((prevRides) =>
-        prevRides.map((r) =>
-          r.id === ride.id ? { ...r, seats: r.seats - 1 } : r
-        )
-      );
-      alert("Ride request sent!");
     } catch (err) {
       alert(err.message);
     }
@@ -169,7 +163,7 @@ export default function FindRide() {
                   disabled={requestedRides[ride.id] || ride.seats <= 0 ||
                     ride.driverId === currentUser?.uid}
                 >
-                  {requestedRides[ride.id] ? "Request Sent" : "Book Ride"}
+                  {ride.driverId === currentUser?.uid ? "Your Ride" : requestedRides[ride.id] ? "Request Sent" : "Book Ride"}
                 </button>
               </div>
             ))
