@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, setPersistence, browserSessionPersistence } from "firebase/auth";
 import { auth } from "@/config/firebase";
 import Link from "next/link";
 import { setCookie } from "cookies-next";
@@ -26,6 +26,7 @@ export default function LoginPage() {
         setError("");
 
         try {
+            await setPersistence(auth, browserSessionPersistence);
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const token = await userCredential.user.getIdToken();
     
