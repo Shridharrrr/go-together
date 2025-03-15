@@ -1,7 +1,12 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { fetchAvailableRides, requestRide, fetchUserRequests, saveRideRequest  } from "@/services/firebaseService";
+import {
+  fetchAvailableRides,
+  requestRide,
+  fetchUserRequests,
+  saveRideRequest,
+} from "@/services/firebaseService";
 import { MapContainer, TileLayer, Marker, Polyline } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
@@ -82,126 +87,159 @@ export default function FindRide() {
   useEffect(() => {
     fetchRoute();
   }, [fromPosition, toPosition]);
-  
+
   useEffect(() => {
     const fetchRequestedRides = async () => {
       if (!currentUser) return;
-  
+
       const userRequests = await fetchUserRequests(currentUser.uid);
       const requested = {};
-      
+
       userRequests.forEach(({ rideId }) => {
         requested[rideId] = true; // Mark the ride as requested
       });
-  
+
       setRequestedRides(requested);
     };
-  
+
     fetchRequestedRides();
   }, [currentUser]);
-  
+
   return (
-    <div className="h-screen flex p-4">
-      <div className="w-1/2 flex flex-col items-center p-4">
-        <h2 className="text-xl font-bold mb-4">Find a Ride</h2>
+    <div className="h-[640px] flex p-4">
+      <div className="w-1/2 flex flex-col items-center p-4 ">
+        <div className="mb-6 flex flex-col items-center justify-center w-full">
+          <h2 className="text-3xl font-bold mb-4">Find your ride!</h2>
+          <div className="relative w-[450px] ">
+            <input
+              type="text"
+              value={from}
+              onChange={(e) => {
+                setFrom(e.target.value);
+                fetchSuggestions(e.target.value, setFromSuggestions);
+              }}
+              placeholder="Leaving From"
+              className="p-2 border-2 rounded-full w-full pl-4"
+            />
+            {fromSuggestions.length > 0 && (
+              <ul className="border bg-white max-h-40 overflow-y-auto absolute z-10 w-full">
+                {fromSuggestions.map((place) => (
+                  <li
+                    key={place.place_id}
+                    onClick={() =>
+                      handleSelect(
+                        place,
+                        setFrom,
+                        setFromPosition,
+                        setFromSuggestions
+                      )
+                    }
+                    className="p-2 hover:bg-gray-200 cursor-pointer"
+                  >
+                    {place.display_name}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
 
-        <div className="relative w-80">
-          <input
-            type="text"
-            value={from}
-            onChange={(e) => {
-              setFrom(e.target.value);
-              fetchSuggestions(e.target.value, setFromSuggestions);
-            }}
-            placeholder="From (Start Location)"
-            className="p-2 border rounded w-full"
-          />
-          {fromSuggestions.length > 0 && (
-            <ul className="border bg-white max-h-40 overflow-y-auto absolute z-10 w-full">
-              {fromSuggestions.map((place) => (
-                <li
-                  key={place.place_id}
-                  onClick={() =>
-                    handleSelect(place, setFrom, setFromPosition, setFromSuggestions)
-                  }
-                  className="p-2 hover:bg-gray-200 cursor-pointer"
-                >
-                  {place.display_name}
-                </li>
-              ))}
-            </ul>
-          )}
+          <div className="relative w-[450px] mt-4">
+            <input
+              type="text"
+              value={to}
+              onChange={(e) => {
+                setTo(e.target.value);
+                fetchSuggestions(e.target.value, setToSuggestions);
+              }}
+              placeholder="Going To"
+              className="p-2 border-2 rounded-full w-full pl-4"
+            />
+            {toSuggestions.length > 0 && (
+              <ul className="border bg-white max-h-40 overflow-y-auto absolute z-10 w-full">
+                {toSuggestions.map((place) => (
+                  <li
+                    key={place.place_id}
+                    onClick={() =>
+                      handleSelect(
+                        place,
+                        setTo,
+                        setToPosition,
+                        setToSuggestions
+                      )
+                    }
+                    className="p-2 hover:bg-gray-200 cursor-pointer"
+                  >
+                    {place.display_name}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
 
-        <div className="relative w-80 mt-4">
-          <input
-            type="text"
-            value={to}
-            onChange={(e) => {
-              setTo(e.target.value);
-              fetchSuggestions(e.target.value, setToSuggestions);
-            }}
-            placeholder="To (Destination)"
-            className="p-2 border rounded w-full"
-          />
-          {toSuggestions.length > 0 && (
-            <ul className="border bg-white max-h-40 overflow-y-auto absolute z-10 w-full">
-              {toSuggestions.map((place) => (
-                <li
-                  key={place.place_id}
-                  onClick={() =>
-                    handleSelect(place, setTo, setToPosition, setToSuggestions)
-                  }
-                  className="p-2 hover:bg-gray-200 cursor-pointer"
-                >
-                  {place.display_name}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
-        <h3 className="mt-6 font-semibold">Matching Rides:</h3>
+        <div className="w-full h-[400px]">
+        {availableRides.length > 0}
+        <h3 className="mt-4 mb-3 font-semibold text-2xl">Matching Rides:</h3>
         <ul>
           {availableRides.length > 0 ? (
             availableRides.map((ride) => (
               <div key={ride.id} className="border p-4 rounded shadow-md mb-4">
-                <h4 className="font-bold">{ride.from} → {ride.to}</h4>
-                <p>Date: {ride.date} | Time: {ride.time}</p>
+                <h4 className="font-bold">
+                  {ride.from} → {ride.to}
+                </h4>
+                <p>
+                  Date: {ride.date} | Time: {ride.time}
+                </p>
                 <p>Seats Available: {ride.seats}</p>
 
                 <button
                   onClick={() => handleRequestRide(ride)}
                   className={`mt-2 px-4 py-2 rounded text-white ${
-                    requestedRides[ride.id] || ride.seats  <= 0 ||
+                    requestedRides[ride.id] ||
+                    ride.seats <= 0 ||
                     ride.driverId === currentUser?.uid
                       ? "bg-gray-400 cursor-not-allowed"
                       : "bg-blue-500 hover:bg-blue-600"
                   }`}
-                  disabled={requestedRides[ride.id] || ride.seats <= 0 ||
-                    ride.driverId === currentUser?.uid}
+                  disabled={
+                    requestedRides[ride.id] ||
+                    ride.seats <= 0 ||
+                    ride.driverId === currentUser?.uid
+                  }
                 >
-                  {ride.driverId === currentUser?.uid ? "Your Ride" : requestedRides[ride.id] ? "Request Sent" : "Book Ride"}
+                  {ride.driverId === currentUser?.uid
+                    ? "Your Ride"
+                    : requestedRides[ride.id]
+                    ? "Request Sent"
+                    : "Book Ride"}
                 </button>
               </div>
             ))
           ) : (
-            <p>No matching rides found.</p>
+            <p className="text-xl font-extralight text-gray-600">No matching rides found.</p>
           )}
         </ul>
+          
+        </div>
       </div>
 
-      <div className="w-1/2 h-full">
-        <MapContainer
-          center={[20.5937, 78.9629]}
-          zoom={6}
-          className="w-full h-full rounded-lg border"
-        >
-          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-          {fromPosition && <Marker position={fromPosition} icon={customMarkerIcon} />}
-          {toPosition && <Marker position={toPosition} icon={customMarkerIcon} />}
-          {routeCoords.length > 0 && <Polyline positions={routeCoords} color="blue" />}
-        </MapContainer>
+      <div className="w-1/2 flex flex-col justify-center p-6">
+      <MapContainer
+            center={[20.5937, 78.9629]}
+            zoom={6}
+            className="w-full h-full rounded-lg border"
+          >
+            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+            {fromPosition && (
+              <Marker position={fromPosition} icon={customMarkerIcon} />
+            )}
+            {toPosition && (
+              <Marker position={toPosition} icon={customMarkerIcon} />
+            )}
+            {routeCoords.length > 0 && (
+              <Polyline positions={routeCoords} color="blue" />
+            )}
+          </MapContainer>
       </div>
     </div>
   );
