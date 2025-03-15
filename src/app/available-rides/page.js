@@ -5,7 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowRight, User } from "lucide-react";
-import { fetchAvailableRides, fetchUserInfo, requestRide } from "@/services/firebaseService";
+import { fetchAvailableRides, fetchUserInfo, requestRide, fetchUserRequests , saveRideRequest } from "@/services/firebaseService";
 
 const AvailableRides = () => {
   const [rideDetails, setRideDetails] = useState([]);
@@ -22,23 +22,30 @@ const AvailableRides = () => {
       setRideDetails(rides);
       setUserDetails(users);
       setShowDriverInfo(Object.fromEntries(rides.map((ride) => [ride.id, false])));
+      
+      if (currentUser) {
+        const userRequests = await fetchUserRequests(currentUser.uid);
+        const requestedMap = Object.fromEntries(userRequests.map((req) => [req.rideId, true]));
+        setRequestedRides(requestedMap);
+      }
     };
 
     getDetails();
-  }, []);
+  }, [currentUser]);
 
   const toggleDriverInfo = (rideId) => {
     setShowDriverInfo((prev) => ({ ...prev, [rideId]: !prev[rideId] }));
   };
 
   const handleRequestRide = async (ride) => {
-    setRequestedRides((prev) => ({ ...prev, [ride.id]: true })); // Disable button instantly
+    setRequestedRides((prev) => ({ ...prev, [ride.id]: true })); 
 
     try {
       await requestRide(ride, currentUser, userDetails);
+      await saveRideRequest(currentUser.uid, ride.id);
     } catch (error) {
       console.error("Ride request failed:", error);
-      setRequestedRides((prev) => ({ ...prev, [ride.id]: false })); // Re-enable button if error occurs
+      setRequestedRides((prev) => ({ ...prev, [ride.id]: false })); 
     }
   };
 

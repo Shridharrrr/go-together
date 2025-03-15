@@ -6,6 +6,9 @@ import {
   addDoc,
   doc,
   updateDoc,
+  setDoc,
+  query,
+  where,
 } from "firebase/firestore";
 
 export const fetchUserInfo = async () => {
@@ -168,4 +171,15 @@ export const requestRide = async (ride, user) => {
     alert("Failed to request ride. Please try again.");
     return { success: false, error };
   }
+};
+
+export const fetchUserRequests = async (userId) => {
+  const q = query(collection(db, "rideRequests"), where("userId", "==", userId));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map((doc) => ({ rideId: doc.data().rideId }));
+};
+
+export const saveRideRequest = async (userId, rideId) => {
+  const requestRef = doc(db, "rideRequests", `${userId}_${rideId}`);
+  await setDoc(requestRef, { userId, rideId, status: "pending" });
 };

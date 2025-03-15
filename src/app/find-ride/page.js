@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { fetchAvailableRides, requestRide } from "@/services/firebaseService";
+import { fetchAvailableRides, requestRide, fetchUserRequests, saveRideRequest  } from "@/services/firebaseService";
 import { MapContainer, TileLayer, Marker, Polyline } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
@@ -64,7 +64,7 @@ export default function FindRide() {
     }
   };
 
-  const findMatchingRides = async (route) => {
+  const findMatchingRides = async () => {
     const matchingRides = await fetchAvailableRides();
     setAvailableRides(matchingRides);
   };
@@ -72,6 +72,7 @@ export default function FindRide() {
   const handleRequestRide = async (ride) => {
     try {
       await requestRide(ride, currentUser);
+      await saveRideRequest(currentUser.uid, ride.id);
       setRequestedRides((prev) => ({ ...prev, [ride.id]: true }));
     } catch (err) {
       alert(err.message);
@@ -81,7 +82,24 @@ export default function FindRide() {
   useEffect(() => {
     fetchRoute();
   }, [fromPosition, toPosition]);
-
+  
+  useEffect(() => {
+    const fetchRequestedRides = async () => {
+      if (!currentUser) return;
+  
+      const userRequests = await fetchUserRequests(currentUser.uid);
+      const requested = {};
+      
+      userRequests.forEach(({ rideId }) => {
+        requested[rideId] = true; // Mark the ride as requested
+      });
+  
+      setRequestedRides(requested);
+    };
+  
+    fetchRequestedRides();
+  }, [currentUser]);
+  
   return (
     <div className="h-screen flex p-4">
       <div className="w-1/2 flex flex-col items-center p-4">
