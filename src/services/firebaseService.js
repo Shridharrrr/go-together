@@ -87,7 +87,7 @@ export const handleCreateRide = async (
 
     const userInfo = userDoc.data();
 
-    await addDoc(collection(db, "availableRides"), {
+    const docRef = await addDoc(collection(db, "availableRides"), {
       from,
       to,
       date,
@@ -100,7 +100,10 @@ export const handleCreateRide = async (
       driverPhone: userInfo.phone,
       driverGender: userInfo.gender,
       driverAge: userInfo.age,
+      id:"",
     });
+
+    await updateDoc(docRef, { id: docRef.id });
 
     alert("Ride created successfully!");
 
@@ -155,6 +158,7 @@ export const requestRide = async (ride, user) => {
       date: ride.date,
       time: ride.time,
       status: "Pending",
+      RideId: ride.id
     });
 
     alert("Ride request sent");

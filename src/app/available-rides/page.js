@@ -82,7 +82,7 @@ const AvailableRides = () => {
               <Button 
                 variant="default" 
                 onClick={() => handleRequestRide(ride)} 
-                disabled={isRequested || isDriver}
+                disabled={isRequested || isDriver || ride.seats<=0}
               >
                 {isDriver ? "Your Ride" : isRequested ? "Requested" : "Request Ride"}
               </Button>

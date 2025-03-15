@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 
 const MyRides = () => {
   const [rideRequests, setRideRequests] = useState([])
+  const [loading, setLoading] = useState(true)
   const { currentUser } = useAuth()
 
   useEffect(() => {
@@ -21,26 +22,58 @@ const MyRides = () => {
         setRideRequests(requestDocs.docs.map((doc) => ({ ...doc.data(), id: doc.id })))
       } catch (err) {
         console.error("Error fetching ride requests:", err)
+      } finally {
+        setLoading(false)
       }
     }
 
     fetchRideRequests()
   }, [currentUser])
-
-  const updateStatus = async (id, status) => {
+  
+  const acceptRide = async (id, rideId) => {
     try {
-      await updateDoc(doc(db, "rideRequests", id), { status })
+     
+      await updateDoc(doc(db, "rideRequests", id), { status: "Accepted" });
+  
+      const rideQuery = query(collection(db, "availableRides"), where("id", "==", rideId));
+      const rideSnap = await getDocs(rideQuery); 
+  
+      if (!rideSnap.empty) {
+       
+        const rideDoc = rideSnap.docs[0]; 
+  
+        const rideRef = doc(db, "availableRides", rideDoc.id);
+        const updatedSeats = rideDoc.data().seats - 1;
+  
+        await updateDoc(rideRef, { seats: updatedSeats });
+      }
+  
       setRideRequests((prev) =>
-        prev.map((req) => (req.id === id ? { ...req, status } : req))
-      )
+        prev.map((req) => (req.id === id ? { ...req, status: "Accepted" } : req))
+      );
     } catch (err) {
-      console.error("Error updating status:", err)
+      console.error("Error accepting ride:", err);
     }
-  }
+  };
+  
+  const rejectRide = async (id) => {
+    try {
+      await updateDoc(doc(db, "rideRequests", id), { status: "Rejected" });
+  
+      setRideRequests((prev) =>
+        prev.map((req) => (req.id === id ? { ...req, status: "Rejected" } : req))
+      );
+    } catch (err) {
+      console.error("Error rejecting ride:", err);
+    }
+  };
+  
 
   return (
     <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {rideRequests.length > 0 ? (
+      {loading ? (
+        <p className="text-center text-muted-foreground">Loading ride requests...</p>
+      ) : rideRequests.length > 0 ? (
         rideRequests.map((req) => (
           <Card key={req.id} className="w-full">
             <CardHeader>
@@ -55,10 +88,10 @@ const MyRides = () => {
             <CardFooter className="flex justify-between">
               {req.status === "Pending" && (
                 <>
-                  <Button variant="success" onClick={() => updateStatus(req.id, "Accepted")}>
+                  <Button variant="success" onClick={() => acceptRide(req.id, req.RideId)}>
                     Accept
                   </Button>
-                  <Button variant="destructive" onClick={() => updateStatus(req.id, "Rejected")}>
+                  <Button variant="destructive" onClick={() => rejectRide(req.id)}>
                     Reject
                   </Button>
                 </>
@@ -73,4 +106,5 @@ const MyRides = () => {
   )
 }
 
-export default MyRides;
+export default MyRides
+
