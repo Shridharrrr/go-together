@@ -3,51 +3,100 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
-import { auth } from "@/config/firebase"; 
+import { auth } from "@/config/firebase";
 import { deleteCookie } from "cookies-next";
+import { usePathname } from "next/navigation";
 
 export default function Navbar() {
-    const [user, setUser] = useState(null);
-    const router = useRouter();
+  const [user, setUser] = useState(null);
+  const router = useRouter();
+  const pathname = usePathname();
 
-    useEffect(() => {
-        const authInstance = getAuth();
-        const unsubscribe = onAuthStateChanged(authInstance, (currentUser) => {
-            setUser(currentUser);
-        });
+  useEffect(() => {
+    const authInstance = getAuth();
+    const unsubscribe = onAuthStateChanged(authInstance, (currentUser) => {
+      setUser(currentUser);
+    });
 
-        return () => unsubscribe(); 
-    }, []);
+    return () => unsubscribe();
+  }, []);
 
-    const handleLogout = async () => {
-        await signOut(auth);
-        deleteCookie("token"); 
-        router.push("/login"); 
-    };
+  const getButtonStyles = (page) => {
+    const isActive = pathname === page;
+    return `py-2 px-5 rounded-full active:scale-95 transition-all ${
+      isActive
+        ? "bg-transparent border border-indigo-500 text-indigo-500 cursor-not-allowed active:scale-100"
+        : "bg-indigo-500 hover:bg-indigo-600 active:bg-indigo-700 text-white"
+    }`;
+  };
 
-    return (
-        <nav className="bg-gray-900 text-white p-4 flex justify-between items-center">
-            <h1 className="text-xl font-bold">Carpool</h1>
+  const handleLogout = async () => {
+    await signOut(auth);
+    deleteCookie("token");
+    router.push("/login");
+  };
 
-            <div className="flex gap-4">
-                {user ? (
-                    <>
-                        <Link href="/my-rides" className="hover:text-gray-400">My Rides</Link>
-                        <Link href="/my-requests" className="hover:text-gray-400">My Requests</Link>
-                        <Link href="/create-ride" className="hover:text-gray-400">Create Ride</Link>
-                        <Link href="/find-ride" className="hover:text-gray-400">Find Ride</Link>
-                        <Link href="/available-rides" className="hover:text-gray-400">All rides</Link>
-                        <button onClick={handleLogout} className="bg-red-500 px-4 py-2 rounded">
-                            Log Out
-                        </button>
-                    </>
-                ) : (
-                    <>
-                        <Link href="/signup" className="hover:text-gray-400">Sign Up</Link>
-                        <Link href="/login" className="hover:text-gray-400">Login</Link>
-                    </>
-                )}
-            </div>
-        </nav>
-    );
+  return (
+    <nav className="bg-slate-800 text-white p-4 flex justify-between items-center">
+      <h1 className="text-2xl font-bold ml-3">GoTogether</h1>
+
+      <div className="flex gap-4 mr-3">
+        {user ? (
+          <>
+            <Link
+              href="/my-rides"
+              className=" bg-indigo-500 py-2 px-5 rounded-full active:scale-95 hover:bg-indigo-600 active:bg-indigo-700"
+            >
+              My Rides
+            </Link>
+            <Link
+              href="/my-requests"
+              className=" bg-indigo-500 py-2 px-5 rounded-full active:scale-95 hover:bg-indigo-600 active:bg-indigo-700"
+            >
+              My Requests
+            </Link>
+            <Link
+              href="/create-ride"
+              className=" bg-indigo-500 py-2 px-5 rounded-full active:scale-95 hover:bg-indigo-600 active:bg-indigo-700"
+            >
+              Create Ride
+            </Link>
+            <Link
+              href="/find-ride"
+              className=" bg-indigo-500 py-2 px-5 rounded-full active:scale-95 hover:bg-indigo-600 active:bg-indigo-700"
+            >
+              Find Ride
+            </Link>
+            <Link
+              href="/available-rides"
+              className=" bg-indigo-500 py-2 px-5 rounded-full active:scale-95 hover:bg-indigo-600 active:bg-indigo-700"
+            >
+              All rides
+            </Link>
+            <button
+              onClick={handleLogout}
+              className="bg-red-500 px-4 py-2 rounded"
+            >
+              Log Out
+            </button>
+          </>
+        ) : (
+          <>
+            <Link
+              href={pathname === "/signup" ? "#" : "/signup"}
+              className={getButtonStyles("/signup")}
+            >
+              Sign Up
+            </Link>
+            <Link
+              href={pathname === "/login" ? "#" : "/login"}
+              className={getButtonStyles("/login")}
+            >
+              Login
+            </Link>
+          </>
+        )}
+      </div>
+    </nav>
+  );
 }

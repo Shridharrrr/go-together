@@ -106,10 +106,24 @@ export default function FindRide() {
   }, [currentUser]);
 
   return (
-    <div className="h-[640px] flex p-4">
+    <div className="h-[641px] flex p-4 bg-gray-900">
       <div className="w-1/2 flex flex-col items-center p-4 ">
         <div className="mb-6 flex flex-col items-center justify-center w-full">
-          <h2 className="text-3xl font-bold mb-4">Find your ride!</h2>
+          <div className="flex  mb-5">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              height="55px" 
+              width="48px" 
+              viewBox="0 -960 960 960"
+              fill="#e3e3e3"
+            >
+              <path d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z" />
+            </svg>
+            <h2 className="text-5xl font-bold text-blue-500 ml-1">
+              Find Your Ride!
+            </h2>
+          </div>
+
           <div className="relative w-[450px] ">
             <input
               type="text"
@@ -119,7 +133,7 @@ export default function FindRide() {
                 fetchSuggestions(e.target.value, setFromSuggestions);
               }}
               placeholder="Leaving From"
-              className="p-2 border-2 rounded-full w-full pl-4"
+              className="p-2 border-2 rounded-full text-white w-full bg-gray-800 pl-4"
             />
             {fromSuggestions.length > 0 && (
               <ul className="border bg-white max-h-40 overflow-y-auto absolute z-10 w-full">
@@ -152,7 +166,7 @@ export default function FindRide() {
                 fetchSuggestions(e.target.value, setToSuggestions);
               }}
               placeholder="Going To"
-              className="p-2 border-2 rounded-full w-full pl-4"
+              className="p-2 border-2 rounded-full bg-gray-800 text-white w-full pl-4"
             />
             {toSuggestions.length > 0 && (
               <ul className="border bg-white max-h-40 overflow-y-auto absolute z-10 w-full">
@@ -178,68 +192,72 @@ export default function FindRide() {
         </div>
 
         <div className="w-full h-[400px]">
-        {availableRides.length > 0}
-        <h3 className="mt-4 mb-3 font-semibold text-2xl">Matching Rides:</h3>
-        <ul>
-          {availableRides.length > 0 ? (
-            availableRides.map((ride) => (
-              <div key={ride.id} className="border p-4 rounded shadow-md mb-4">
-                <h4 className="font-bold">
-                  {ride.from} → {ride.to}
-                </h4>
-                <p>
-                  Date: {ride.date} | Time: {ride.time}
-                </p>
-                <p>Seats Available: {ride.seats}</p>
-
-                <button
-                  onClick={() => handleRequestRide(ride)}
-                  className={`mt-2 px-4 py-2 rounded text-white ${
-                    requestedRides[ride.id] ||
-                    ride.seats <= 0 ||
-                    ride.driverId === currentUser?.uid
-                      ? "bg-gray-400 cursor-not-allowed"
-                      : "bg-blue-500 hover:bg-blue-600"
-                  }`}
-                  disabled={
-                    requestedRides[ride.id] ||
-                    ride.seats <= 0 ||
-                    ride.driverId === currentUser?.uid
-                  }
+          {availableRides.length > 0}
+          <h3 className="mt-4 mb-3 font-semibold text-2xl text-white">Matching Rides:</h3>
+          <ul>
+            {availableRides.length > 0 ? (
+              availableRides.map((ride) => (
+                <div
+                  key={ride.id}
+                  className="border p-4 rounded bg-gray-800 text-white shadow-md mb-4"
                 >
-                  {ride.driverId === currentUser?.uid
-                    ? "Your Ride"
-                    : requestedRides[ride.id]
-                    ? "Request Sent"
-                    : "Book Ride"}
-                </button>
-              </div>
-            ))
-          ) : (
-            <p className="text-xl font-extralight text-gray-600">No matching rides found.</p>
-          )}
-        </ul>
-          
+                  <h4 className="font-bold">
+                    {ride.from} → {ride.to}
+                  </h4>
+                  <p>
+                    Date: {ride.date} | Time: {ride.time}
+                  </p>
+                  <p>Seats Available: {ride.seats}</p>
+
+                  <button
+                    onClick={() => handleRequestRide(ride)}
+                    className={`mt-2 px-4 py-2 rounded-full text-white ${
+                      requestedRides[ride.id] ||
+                      ride.seats <= 0 ||
+                      ride.driverId === currentUser?.uid
+                        ? "bg-gray-400"
+                        : "bg-blue-500 hover:bg-blue-600"
+                    }`}
+                    disabled={
+                      requestedRides[ride.id] ||
+                      ride.seats <= 0 ||
+                      ride.driverId === currentUser?.uid
+                    }
+                  >
+                    {ride.driverId === currentUser?.uid
+                      ? "Your Ride"
+                      : requestedRides[ride.id]
+                      ? "Request Sent"
+                      : "Book Ride"}
+                  </button>
+                </div>
+              ))
+            ) : (
+              <p className="text-xl font-extralight text-white">
+                No matching rides found.
+              </p>
+            )}
+          </ul>
         </div>
       </div>
 
       <div className="w-1/2 flex flex-col justify-center p-6">
-      <MapContainer
-            center={[20.5937, 78.9629]}
-            zoom={6}
-            className="w-full h-full rounded-lg border"
-          >
-            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-            {fromPosition && (
-              <Marker position={fromPosition} icon={customMarkerIcon} />
-            )}
-            {toPosition && (
-              <Marker position={toPosition} icon={customMarkerIcon} />
-            )}
-            {routeCoords.length > 0 && (
-              <Polyline positions={routeCoords} color="blue" />
-            )}
-          </MapContainer>
+        <MapContainer
+          center={[20.5937, 78.9629]}
+          zoom={6}
+          className="w-full h-full rounded-lg border"
+        >
+          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+          {fromPosition && (
+            <Marker position={fromPosition} icon={customMarkerIcon} />
+          )}
+          {toPosition && (
+            <Marker position={toPosition} icon={customMarkerIcon} />
+          )}
+          {routeCoords.length > 0 && (
+            <Polyline positions={routeCoords} color="blue" />
+          )}
+        </MapContainer>
       </div>
     </div>
   );
