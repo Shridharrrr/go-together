@@ -51,7 +51,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center bg-slate-800 h-[628px] p-4 overflow-hidden">
+    <div className="flex flex-col items-center justify-center bg-slate-900 h-[628px] p-4 overflow-hidden">
       <div className="relative flex gap-10 flex-wrap lg:flex-nowrap">
         
         <motion.img
@@ -62,7 +62,7 @@ export default function LoginPage() {
           transition={{ duration: 1, ease: "easeOut" }}
         />
 
-        <div className="flex flex-col justify-center items-center w-[440px] h-[460px] bg-slate-700 border-indigo-500 rounded-2xl border-2 shadow-2xl">
+        <div className="flex flex-col justify-center items-center w-[440px] h-[460px] bg-slate-800 border-indigo-500 rounded-2xl border-2 shadow-2xl">
           <h2 className="text-4xl text-white font-bold">Welcome Back!</h2>
           <span className="text-white mb-8">Let’s Go-Together Again!</span>
           <form onSubmit={handleLogin} className="flex flex-col text-gray-900">
