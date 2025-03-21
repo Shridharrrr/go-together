@@ -48,7 +48,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="bg-slate-900 text-white p-4 py-6 flex justify-between items-center relative z-50">
+    <nav className="bg-slate-900 text-white p-4 py-6 mb-6 flex justify-between items-center relative z-50">
   <h1 className="text-2xl font-bold ml-3">GoTogether</h1>
 
   {/* Desktop Navigation */}
