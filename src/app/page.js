@@ -106,20 +106,21 @@ export default function FindRide() {
   }, [currentUser]);
 
   return (
-    <div className="h-[641px] flex p-4 bg-gray-900">
+    <div className="min-h-screen flex p-4 bg-gray-900">
       <div className="w-1/2 flex flex-col items-center p-4 ">
-        <div className="mb-6 flex flex-col items-center justify-center w-full">
+        <div className="mb-6 flex flex-col items-center justify-center w-full bg-slate-800 py-8 rounded-2xl border-indigo-500 border-2">
           <div className="flex  mb-5">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               height="55px" 
               width="48px" 
+              className="text-[#4c3fff]"
               viewBox="0 -960 960 960"
               fill="#e3e3e3"
             >
               <path d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z" />
             </svg>
-            <h2 className="text-5xl font-bold text-blue-500 ml-1">
+            <h2 className="text-5xl font-bold text-white ml-1">
               Find Your Ride!
             </h2>
           </div>
@@ -136,7 +137,7 @@ export default function FindRide() {
               className="p-2 border-2 rounded-full text-white w-full bg-gray-800 pl-4"
             />
             {fromSuggestions.length > 0 && (
-              <ul className="border bg-white max-h-40 overflow-y-auto absolute z-10 w-full">
+              <ul className="border bg-slate-700 text-white max-h-40 overflow-y-auto absolute z-10 w-full">
                 {fromSuggestions.map((place) => (
                   <li
                     key={place.place_id}
@@ -148,7 +149,7 @@ export default function FindRide() {
                         setFromSuggestions
                       )
                     }
-                    className="p-2 hover:bg-gray-200 cursor-pointer"
+                    className="p-2 hover:bg-slate-900 cursor-pointer"
                   >
                     {place.display_name}
                   </li>
@@ -169,7 +170,7 @@ export default function FindRide() {
               className="p-2 border-2 rounded-full bg-gray-800 text-white w-full pl-4"
             />
             {toSuggestions.length > 0 && (
-              <ul className="border bg-white max-h-40 overflow-y-auto absolute z-10 w-full">
+              <ul className="border bg-slate-700 text-white max-h-40 overflow-y-auto absolute z-10 w-full">
                 {toSuggestions.map((place) => (
                   <li
                     key={place.place_id}
@@ -181,7 +182,7 @@ export default function FindRide() {
                         setToSuggestions
                       )
                     }
-                    className="p-2 hover:bg-gray-200 cursor-pointer"
+                    className="p-2 hover:bg-slate-900 cursor-pointer"
                   >
                     {place.display_name}
                   </li>
@@ -191,9 +192,9 @@ export default function FindRide() {
           </div>
         </div>
 
-        <div className="w-full h-[400px]">
+        <div className="w-full ">
           {availableRides.length > 0}
-          <h3 className="mt-4 mb-3 font-semibold text-2xl text-white">Matching Rides:</h3>
+          <h3 className="mt-4 mb-3 font-semibold text-3xl text-white">Matching Rides:</h3>
           <ul>
             {availableRides.length > 0 ? (
               availableRides.map((ride) => (
@@ -216,7 +217,7 @@ export default function FindRide() {
                       ride.seats <= 0 ||
                       ride.driverId === currentUser?.uid
                         ? "bg-gray-400"
-                        : "bg-blue-500 hover:bg-blue-600"
+                        : "bg-indigo-500 hover:bg-indigo-600"
                     }`}
                     disabled={
                       requestedRides[ride.id] ||
@@ -241,7 +242,7 @@ export default function FindRide() {
         </div>
       </div>
 
-      <div className="w-1/2 flex flex-col justify-center p-6">
+      <div className="w-1/2 h-[600px] flex flex-col justify-center p-4">
         <MapContainer
           center={[20.5937, 78.9629]}
           zoom={6}

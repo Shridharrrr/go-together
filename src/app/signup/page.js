@@ -82,15 +82,17 @@ export default function SignUpPage() {
   };
   return (
     <div className="flex flex-col bg-slate-900 h-[628px] items-center w-screen">
-      <span className="mt-4 mb-20 text-6xl text-white font-bold">
-        <span className="text-green-400">Sign-Up</span> now and Get started!
+      <span className="mt-4 text-6xl mb-3 font-bold bg-gradient-to-r from-[#4c3fff] via-[#665bff] to-[#7579ff] bg-clip-text text-transparent leading-tight pb-1">
+        <span className="text-green-400">Sign-Up</span> and Get started!
       </span>
+      <span className="text-white text-xl mb-16 ">"Meet, share, and ride - your carpooling community awaits!"</span>
+
       <div className="flex gap-6 items-start justify-center w-full">
         <motion.img
           src="Pic-2.png"
           className="h-[340px] w-[520px] bg-contain"
-          initial={{ scale: 0.7,opacity: 0 }}
-          animate={{ scale: 1,opacity: 1}}
+          initial={{ scale: 0.7, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 2, ease: "easeOut" }}
         ></motion.img>
         <div className="flex flex-col mt-4 items-center justify-center border-2 border-indigo-500 rounded-2xl py-10 w-[520px] px-4 bg-slate-800 shadow-lg">
