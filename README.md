@@ -1,6 +1,6 @@
 # Go Together 🚗🫂  
 
-Go Together is a smart carpooling platform that connects drivers and passengers for convenient, cost-effective, and eco-friendly shared rides. With real-time location tracking and secure authentication, Go Together makes ride-sharing seamless.  
+Go Together is a smart carpooling platform that connects drivers and passengers for convenient, cost-effective, and eco-friendly shared rides. With location tracking and secure authentication, Go Together makes ride-sharing seamless.  
 
 ## 🌟 Features  
 
