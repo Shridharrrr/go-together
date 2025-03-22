@@ -1,7 +1,12 @@
 "use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  updateProfile,
+  setPersistence,
+  browserSessionPersistence,
+} from "firebase/auth";
 import { auth, db } from "@/config/firebase";
 import "react-phone-input-2/lib/style.css";
 import PhoneInput from "react-phone-input-2";
@@ -61,6 +66,7 @@ export default function SignUpPage() {
     setIsLoading(true);
 
     try {
+      await setPersistence(auth, browserSessionPersistence);
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         user.email,
