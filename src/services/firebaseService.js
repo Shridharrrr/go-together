@@ -33,20 +33,37 @@ export const fetchSuggestions = async (query, setSuggestions) => {
   }
 };
 
-export const fetchRoute = async (fromPosition, toPosition) => {
+export const fetchRouteFindRide = async (fromPosition, toPosition, setRouteCoords, findMatchingRides, setDistance) => {
   if (fromPosition && toPosition) {
     const res = await fetch(
       `https://router.project-osrm.org/route/v1/driving/${fromPosition[1]},${fromPosition[0]};${toPosition[1]},${toPosition[0]}?overview=full&geometries=geojson`
     );
     const data = await res.json();
     if (data.routes && data.routes.length > 0) {
-      return data.routes[0].geometry.coordinates.map(([lon, lat]) => [
-        lat,
-        lon,
-      ]);
+      const route = data.routes[0];
+      const coords = route.geometry.coordinates.map(([lon, lat]) => [lat, lon]);
+      setRouteCoords(coords);
+      setDistance(route.distance / 1000); 
+      findMatchingRides(coords);
     }
   }
 };
+
+export const fetchRouteCreateRide = async (fromPosition, toPosition, setRouteCoords,setDistance) => {
+  if (fromPosition && toPosition) {
+    const res = await fetch(
+      `https://router.project-osrm.org/route/v1/driving/${fromPosition[1]},${fromPosition[0]};${toPosition[1]},${toPosition[0]}?overview=full&geometries=geojson`
+    );
+    const data = await res.json();
+    if (data.routes && data.routes.length > 0) {
+      const route = data.routes[0];
+      const coords = route.geometry.coordinates.map(([lon, lat]) => [lat, lon]);
+      setRouteCoords(coords);
+      setDistance(route.distance / 1000); 
+    }
+  }
+};
+
 
 export const handleCreateRide = async (
   e,
@@ -57,6 +74,7 @@ export const handleCreateRide = async (
   seats,
   fromPosition,
   toPosition,
+  distance,
   setFrom,
   setTo,
   setDate,
@@ -90,10 +108,13 @@ export const handleCreateRide = async (
 
     const userInfo = userDoc.data();
 
+    const price = Math.round((((distance/15)*103.50)/seats),2);
+
+
     const docRef = await addDoc(collection(db, "availableRides"), {
       from,
       to,
-      date,
+      date : new Date(date.seconds * 1000).toLocaleDateString("en-IN"),
       time,
       seats: parseInt(seats),
       driverId: user.uid,
@@ -104,6 +125,7 @@ export const handleCreateRide = async (
       driverGender: userInfo.gender,
       driverAge: userInfo.age,
       id:"",
+      price : price,
     });
 
     await updateDoc(docRef, { id: docRef.id });

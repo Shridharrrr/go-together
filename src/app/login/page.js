@@ -52,7 +52,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className=" bg-slate-900 h-screen p-4 overflow-hidden">
+    <div className=" bg-slate-900 h-screen overflow-hidden">
       <Navbar/>
       <div className="flex flex-col items-center justify-center">
         <div className="relative flex gap-10 flex-wrap lg:flex-nowrap">
