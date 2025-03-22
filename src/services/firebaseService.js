@@ -23,9 +23,8 @@ export const fetchUserInfo = async () => {
 
 export const fetchSuggestions = async (query, setSuggestions) => {
   if (query.length > 2) {
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${query}`
-    );
+    const res = await fetch(`https://us1.locationiq.com/v1/search.php?key=pk.eed5afac263c470bcba317a30d5fd21e&q=${query}&format=json`);
+
     const data = await res.json();
     setSuggestions(data);
   } else {
@@ -43,13 +42,12 @@ export const fetchRouteFindRide = async (fromPosition, toPosition, setRouteCoord
       const route = data.routes[0];
       const coords = route.geometry.coordinates.map(([lon, lat]) => [lat, lon]);
       setRouteCoords(coords);
-      setDistance(route.distance / 1000); 
       findMatchingRides(coords);
     }
   }
 };
 
-export const fetchRouteCreateRide = async (fromPosition, toPosition, setRouteCoords,setDistance) => {
+export const fetchRouteCreateRide = async (fromPosition, toPosition, setRouteCoords, setDistance) => {
   if (fromPosition && toPosition) {
     const res = await fetch(
       `https://router.project-osrm.org/route/v1/driving/${fromPosition[1]},${fromPosition[0]};${toPosition[1]},${toPosition[0]}?overview=full&geometries=geojson`
@@ -114,7 +112,7 @@ export const handleCreateRide = async (
     const docRef = await addDoc(collection(db, "availableRides"), {
       from,
       to,
-      date : new Date(date.seconds * 1000).toLocaleDateString("en-IN"),
+      date,
       time,
       seats: parseInt(seats),
       driverId: user.uid,

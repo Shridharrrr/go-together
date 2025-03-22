@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect,useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
 import {
   fetchAvailableRides,
@@ -15,6 +15,7 @@ import L from "leaflet";
 import markerIconPng from "leaflet/dist/images/marker-icon.png";
 import markerShadowPng from "leaflet/dist/images/marker-shadow.png";
 import Navbar from "@/components/Navbar";
+import { debounce } from "lodash";
 
 const customMarkerIcon = new L.Icon({
   iconUrl: markerIconPng.src,
@@ -59,8 +60,18 @@ export default function FindRide() {
     }
   };
 
+  const debouncedFetchTo = useCallback(
+    debounce((query) => fetchSuggestions(query, setToSuggestions), 1000),
+    [setToSuggestions] 
+  );
+
+  const debouncedFetchFrom = useCallback(
+    debounce((query) => fetchSuggestions(query, setFromSuggestions), 1000), 
+    [setFromSuggestions]
+  );
+
   useEffect(() => {
-    fetchRouteFindRide(fromPosition,toPosition,setRouteCoords,findMatchingRides);
+    fetchRouteFindRide(fromPosition,toPosition,setRouteCoords,findMatchingRides,);
   }, [fromPosition, toPosition]);
 
   useEffect(() => {
@@ -108,7 +119,7 @@ export default function FindRide() {
                 value={from}
                 onChange={(e) => {
                   setFrom(e.target.value);
-                  fetchSuggestions(e.target.value, setFromSuggestions);
+                  debouncedFetchFrom(e.target.value);
                 }}
                 placeholder="Leaving From"
                 className="p-2 border-2 rounded-full text-white w-full bg-gray-800 pl-3"
@@ -141,7 +152,7 @@ export default function FindRide() {
                 value={to}
                 onChange={(e) => {
                   setTo(e.target.value);
-                  fetchSuggestions(e.target.value, setToSuggestions);
+                  debouncedFetchTo(e.target.value);
                 }}
                 placeholder="Going To"
                 className="p-2 border-2 rounded-full bg-gray-800 text-white w-full pl-3"
