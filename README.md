@@ -54,7 +54,3 @@ Feel free to fork the repo, create a branch, and submit a pull request. Suggesti
 ## 📄 License  
 
 This project is licensed under the MIT License.  
-
----
-
-Let me know if you’d like any modifications!
