@@ -13,7 +13,7 @@ Go Together is a smart carpooling platform that connects drivers and passengers 
 - **Frontend:** React.js, Next.js, Tailwind CSS  
 - **Backend:** Next.js API routes (serverless functions)  
 - **Database & Auth:** Firebase  
-- **Maps & Location:** Leaflet.js, OpenStreetMap API  
+- **Maps & Location:** Leaflet.js, LocationIQ and OSRM API  
 - **Hosting:** Vercel  
 
 ## 📦 Installation & Setup  
