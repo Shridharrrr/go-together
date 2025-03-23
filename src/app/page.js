@@ -101,16 +101,6 @@ export default function FindRide() {
         <div className="w-full md:w-1/2 flex flex-col items-center p-4">
           <div className="mb-6 flex flex-col items-center justify-center w-full bg-slate-800 py-8 rounded-2xl border-indigo-500 border-2">
             <div className="flex  mb-5">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                height="50px"
-                width="42px"
-                className="text-[#4c3fff]"
-                viewBox="0 -960 960 960"
-                fill="#e3e3e3"
-              >
-                <path d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z" />
-              </svg>
               <h2 className="text-4xl font-bold text-white ml-1">
                 Find Your Ride!
               </h2>
