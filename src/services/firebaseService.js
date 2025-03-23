@@ -10,6 +10,8 @@ import {
   query,
   where,
 } from "firebase/firestore";
+import { toast, Bounce } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export const fetchUserInfo = async () => {
   try {
@@ -118,7 +120,7 @@ export const handleCreateRide = async (
       driverId: user.uid,
       fromCoords: fromPosition,
       toCoords: toPosition,
-      driverName: `${userInfo.firstname} ${userInfo.lastname}`, // Fixed spacing
+      driverName: `${userInfo.firstname} ${userInfo.lastname}`, 
       driverPhone: userInfo.phone,
       driverGender: userInfo.gender,
       driverAge: userInfo.age,
@@ -128,7 +130,17 @@ export const handleCreateRide = async (
 
     await updateDoc(docRef, { id: docRef.id });
 
-    alert("Ride created successfully!");
+    toast.success('Ride Created Successfully!', {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: false,
+      draggable: false,
+      progress: undefined,
+      theme: "dark",
+      transition: Bounce,
+      });
 
     setFrom("");
     setTo("");

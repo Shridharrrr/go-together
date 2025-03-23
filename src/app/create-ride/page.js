@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect,useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   fetchSuggestions,
   fetchRouteCreateRide,
@@ -19,6 +19,8 @@ import markerShadowPng from "leaflet/dist/images/marker-shadow.png";
 import { debounce } from "lodash";
 import "react-datepicker/dist/react-datepicker.css";
 import Navbar from "@/components/Navbar";
+import { ToastContainer, Bounce } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const customMarkerIcon = new L.Icon({
   iconUrl: markerIconPng.src,
@@ -50,14 +52,14 @@ export default function CreateRide() {
   };
 
   const debouncedFetchTo = useCallback(
-      debounce((query) => fetchSuggestions(query, setToSuggestions), 1000),
-      [setToSuggestions] 
-    );
-  
-    const debouncedFetchFrom = useCallback(
-      debounce((query) => fetchSuggestions(query, setFromSuggestions), 1000), 
-      [setFromSuggestions]
-    );
+    debounce((query) => fetchSuggestions(query, setToSuggestions), 1000),
+    [setToSuggestions]
+  );
+
+  const debouncedFetchFrom = useCallback(
+    debounce((query) => fetchSuggestions(query, setFromSuggestions), 1000),
+    [setFromSuggestions]
+  );
 
   useEffect(() => {
     if (fromPosition && toPosition) {
@@ -80,9 +82,22 @@ export default function CreateRide() {
   return (
     <div className="min-h-screen bg-slate-900">
       <Navbar />
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss={false}
+        draggable={false}
+        pauseOnHover
+        theme="light"
+        transition={Bounce}
+      />
       <div className="flex flex-col lg:flex-row pb-4 px-4">
         <div className="w-full lg:w-1/2 flex flex-col items-center p-4">
-          <div className="mb-6 flex flex-col items-center justify-center w-full bg-slate-800 py-8 rounded-2xl border-indigo-500 border-2">
+          <div className="mb-6 flex flex-col items-center justify-center w-full lg:w-5/6 bg-slate-800 py-8 rounded-2xl border-indigo-500 border-2">
             <div className="flex mb-5">
               <h2 className="text-4xl lg:text-5xl font-bold text-white ml-1">
                 Create A Ride!
@@ -216,7 +231,7 @@ export default function CreateRide() {
         <div className="hidden w-full lg:w-1/2 h-[560px] z-10 lg:flex flex-col justify-center p-4">
           <MapContainer
             center={[15.33, 74.05]}
-            zoom={6}
+            zoom={10}
             className="w-full h-full rounded-lg border"
           >
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
@@ -250,7 +265,7 @@ export default function CreateRide() {
             <div className="z-20 w-3/4 h-3/4 lg:w-1/2 lg:h-[560px] relative">
               <MapContainer
                 center={[15.33, 74.05]}
-                zoom={6}
+                zoom={10}
                 className="w-full h-full rounded-lg border"
               >
                 <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
