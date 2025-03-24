@@ -99,9 +99,9 @@ export default function FindRide() {
       <Navbar />
       <div className="flex pb-4 px-4 ">
         <div className="w-full md:w-1/2 flex flex-col items-center p-4">
-          <div className="mb-6 flex flex-col items-center justify-center w-full bg-slate-800 py-8 rounded-2xl border-indigo-500 border-2">
+          <div className="mb-6 flex flex-col h-[300px] items-center justify-center border-2 border-dashed w-full bg-slate-800 py-8 rounded-xl ">
             <div className="flex  mb-5">
-              <h2 className="text-4xl font-bold text-white ml-1">
+              <h2 className="text-4xl lg:text-5xl  font-bold text-white ml-1">
                 Find Your Ride!
               </h2>
             </div>
@@ -114,7 +114,7 @@ export default function FindRide() {
                   setFrom(e.target.value);
                   fetchSuggestions(e.target.value, setFromSuggestions);
                 }}
-                placeholder="Leaving From"
+                placeholder="⚲ Leaving From"
                 className="p-2 border-2 rounded-full text-white w-full bg-gray-800 pl-3"
               />
               {fromSuggestions.length > 0 && (
@@ -147,7 +147,7 @@ export default function FindRide() {
                   setTo(e.target.value);
                   fetchSuggestions(e.target.value, setToSuggestions);
                 }}
-                placeholder="Going To"
+                placeholder="⚲ Going To"
                 className="p-2 border-2 rounded-full bg-gray-800 text-white w-full pl-3"
               />
               {toSuggestions.length > 0 && (
@@ -205,24 +205,24 @@ export default function FindRide() {
                       {availableRides.map((ride) => (
                         <div
                           key={ride.id}
-                          className="border p-4 rounded bg-gray-800 text-white shadow-md mb-4"
+                          className="border-2 border-indigo-500 border-dashed p-6 rounded-xl bg-gray-800 text-white shadow-md mb-4"
                         >
                           <h4 className="font-bold">
-                            {ride.from} → {ride.to}
+                            <span className="text-yellow-300">{ride.from}</span>{" "}
+                            → <span>{ride.to}</span>
                           </h4>
-                          <p>
-                            Date: {ride.date} | Time: {ride.time}
-                          </p>
+                          <p>Date: {ride.date}</p>
+                          <p>Time: {ride.time}</p>
                           <p>Seats Available: {ride.seats}</p>
 
                           <button
                             onClick={() => handleRequestRide(ride)}
-                            className={`mt-2 px-4 py-2 rounded-full text-white ${
+                            className={`relative group mt-3  w-[120px] text-white p-2 rounded-xl transition-all overflow-hidden" ${
                               requestedRides[ride.id] ||
                               ride.seats <= 0 ||
                               ride.driverId === currentUser?.uid
                                 ? "bg-gray-400"
-                                : "bg-indigo-500 hover:bg-indigo-600"
+                                : "bg-green-500 hover:bg-green-600 active:bg-green-700"
                             }`}
                             disabled={
                               requestedRides[ride.id] ||
@@ -230,11 +230,16 @@ export default function FindRide() {
                               ride.driverId === currentUser?.uid
                             }
                           >
-                            {ride.driverId === currentUser?.uid
-                              ? "Your Ride"
-                              : requestedRides[ride.id]
-                              ? "Request Sent"
-                              : "Book Ride"}
+                            <span className="group-hover:opacity-0 transition-opacity duration-300">
+                              {ride.driverId === currentUser?.uid
+                                ? "Your Ride"
+                                : requestedRides[ride.id]
+                                ? "Request Sent"
+                                : "Book Ride"}
+                            </span>
+                            <span className="absolute inset-0 flex items-center text-2xl mb-1 justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                              ✓
+                            </span>
                           </button>
                         </div>
                       ))}
