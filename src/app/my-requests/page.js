@@ -34,7 +34,7 @@ const MyRequests = () => {
 
   return (
     <div className="h-screen bg-slate-900 overflow-y-auto">
-      <Navbar/>
+      <Navbar />
       <h2 className="text-3xl font-semibold text-white pl-4">My Requests :</h2>
       <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {requests.length > 0 ? (
@@ -52,7 +52,17 @@ const MyRequests = () => {
                 <p className="text-md text-white">Date: {req.date}</p>
                 <p className="text-md text-white">Time: {req.time}</p>
                 <p className="text-md text-white">Driver: {req.driverName}</p>
-                <p className="text-md text-white">Status: {req.status}</p>
+                <p
+                  className={`text-md ${
+                    req.status === "Accepted"
+                      ? "text-green-500"
+                      : req.status === "Rejected"
+                      ? "text-red-500"
+                      : "text-gray-500"
+                  }`}
+                >
+                  Status: {req.status}
+                </p>
               </CardContent>
             </Card>
           ))

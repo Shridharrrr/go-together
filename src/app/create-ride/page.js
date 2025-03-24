@@ -17,7 +17,6 @@ import L from "leaflet";
 import markerIconPng from "leaflet/dist/images/marker-icon.png";
 import markerShadowPng from "leaflet/dist/images/marker-shadow.png";
 import { debounce } from "lodash";
-import "react-datepicker/dist/react-datepicker.css";
 import Navbar from "@/components/Navbar";
 import { ToastContainer, Bounce } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -97,7 +96,7 @@ export default function CreateRide() {
       />
       <div className="flex flex-col lg:flex-row pb-4 px-4">
         <div className="w-full lg:w-1/2 flex flex-col items-center p-4">
-          <div className="mb-6 flex flex-col items-center justify-center w-full lg:w-5/6 bg-slate-800 py-8 rounded-2xl border-indigo-500 border-2">
+          <div className="mb-6 flex flex-col items-center justify-center h-full w-full lg:w-5/6 bg-slate-800 py-8 rounded-2xl border-dashed border-2">
             <div className="flex mb-5">
               <h2 className="text-4xl lg:text-5xl font-bold text-white ml-1">
                 Create A Ride!
@@ -135,7 +134,7 @@ export default function CreateRide() {
                     setFrom(e.target.value);
                     debouncedFetchFrom(e.target.value);
                   }}
-                  placeholder="Leaving From"
+                  placeholder="⚲ Leaving From"
                   className="p-2 border-2 rounded-full text-white w-full bg-gray-800 pl-4"
                 />
                 {fromSuggestions.length > 0 && (
@@ -168,7 +167,7 @@ export default function CreateRide() {
                     setTo(e.target.value);
                     debouncedFetchTo(e.target.value);
                   }}
-                  placeholder="Going To"
+                  placeholder="⚲ Going To"
                   className="p-2 border-2 rounded-full text-white w-full bg-gray-800 pl-4"
                 />
                 {toSuggestions.length > 0 && (

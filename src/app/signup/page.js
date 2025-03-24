@@ -95,7 +95,7 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="bg-slate-900 min-h-screen">
+    <div className="bg-gray-900 min-h-screen">
       <Navbar />
       <div className="flex flex-col items-center p-4">
         <span className="text-4xl text-center md:text-6xl mb-3 font-bold bg-gradient-to-r from-[#4c3fff] via-[#665bff] to-[#7579ff] bg-clip-text text-transparent leading-tight pb-1">
@@ -114,7 +114,7 @@ export default function SignUpPage() {
             transition={{ duration: 2, ease: "easeOut" }}
           ></motion.img>
           <div className="flex flex-col mt-4 items-center justify-center border-2 border-indigo-500 rounded-2xl py-8 md:py-10 w-full md:w-[520px] px-4 bg-slate-800 shadow-lg">
-            <div className="flex justify-center mb-4">
+            <div className="flex justify-center items-center mb-4">
               {[1, 2, 3, 4, 5, 6].map((num) => (
                 <div
                   key={num}
