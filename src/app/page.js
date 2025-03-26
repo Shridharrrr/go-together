@@ -18,7 +18,7 @@ export default function Home() {
           </h4>
           <button
             onClick={() => router.push("/signup")}
-            className="relative group text-lg md:text-xl bg-indigo-500 w-[350px] font-semibold text-white p-3 md:p-4 rounded-2xl hover:bg-indigo-600 active:bg-indigo-700 transition-all overflow-hidden"
+            className="relative group text-lg md:text-xl bg-indigo-500 w-[350px] font-semibold text-white p-3 md:p-4 rounded-full hover:bg-indigo-600 active:bg-indigo-700 transition-all overflow-hidden"
           >
             <span className="group-hover:opacity-0 transition-opacity duration-300">
               Get Started
