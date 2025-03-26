@@ -30,7 +30,7 @@ export default function Home() {
         </div>
 
         {/* Image Section */}
-        <div className="w-full lg:h-[470px] flex justify-center">
+        <div className="w-full lg:h-[480px] flex justify-center">
         <motion.img
             src="Pic-3.png"
             className="w-full"
