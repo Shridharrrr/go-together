@@ -16,7 +16,6 @@ import Navbar from "@/components/Navbar";
 
 export default function SignUpPage() {
   const [step, setStep] = useState(1);
-  const totalSteps = 6;
   const [user, setUser] = useState({
     firstname: "",
     lastname: "",
@@ -98,8 +97,8 @@ export default function SignUpPage() {
     <div className="bg-gray-900 min-h-screen">
       <Navbar />
       <div className="flex flex-col items-center p-4">
-        <span className="text-4xl text-center md:text-6xl mb-3 font-bold bg-gradient-to-r from-[#4c3fff] via-[#665bff] to-[#7579ff] bg-clip-text text-transparent leading-tight pb-1">
-          <span className="text-green-400">Sign-Up</span> and Get started!
+        <span className="text-3xl text-center md:text-6xl mb-3 font-bold bg-gradient-to-r from-[#4c3fff] via-[#665bff] to-[#7579ff] bg-clip-text text-transparent leading-tight pb-1">
+          <span className="text-green-400 ">Sign-Up</span> and Get started!
         </span>
         <span className="text-white text-lg md:text-xl mb-8 text-center">
           "Meet, share, and ride - your carpooling community awaits!"
