@@ -135,7 +135,7 @@ export default function SignUpPage() {
                   onChange={handleChange}
                   placeholder="Email"
                   required
-                  className="border border-gray-300 bg-gray-100 mb-3 p-2 w-full md:w-[410px] rounded-full pl-4 placeholder:text-gray-400"
+                  className="border border-gray-300 bg-gray-100 mb-3 p-2 w-5/6 md:w-[410px] rounded-full pl-4 placeholder:text-gray-400"
                 />
                 <button
                   onClick={nextStep}
@@ -163,7 +163,7 @@ export default function SignUpPage() {
                   onChange={handleChange}
                   placeholder="Firstname"
                   required
-                  className="border border-gray-300 bg-gray-100 mb-3 p-2 w-full md:w-[410px] rounded-full pl-4 placeholder:text-gray-400"
+                  className="border border-gray-300 bg-gray-100 mb-3 p-2 w-5/6 md:w-[410px] rounded-full pl-4 placeholder:text-gray-400"
                 />
                 <input
                   type="text"
@@ -171,7 +171,7 @@ export default function SignUpPage() {
                   value={user.lastname}
                   onChange={handleChange}
                   placeholder="Lastname (Optional)"
-                  className="border border-gray-300 bg-gray-100 mb-3 p-2 w-full md:w-[410px] rounded-full pl-4 placeholder:text-gray-400"
+                  className="border border-gray-300 bg-gray-100 mb-3 p-2 w-5/6 md:w-[410px] rounded-full pl-4 placeholder:text-gray-400"
                 />
                 <div className="flex gap-4 mt-2">
                   <button
@@ -212,7 +212,7 @@ export default function SignUpPage() {
                   onChange={handleChange}
                   placeholder="Age"
                   required
-                  className="border border-gray-300 bg-gray-100 mb-3 p-2 w-full md:w-[410px] rounded-full pl-4 placeholder:text-gray-400"
+                  className="border border-gray-300 bg-gray-100 mb-3 p-2 w-5/6 md:w-[410px] rounded-full pl-4 placeholder:text-gray-400"
                 />
                 <div className="flex gap-4 mt-2">
                   <button
@@ -252,7 +252,7 @@ export default function SignUpPage() {
                   value={user.gender}
                   onChange={handleChange}
                   required
-                  className="border border-gray-300 bg-gray-100 mb-3 p-2 w-full md:w-[410px] rounded-full pl-4 placeholder:text-gray-400"
+                  className="border border-gray-300 bg-gray-100 mb-3 p-2 w-5/6 md:w-[410px] rounded-full pl-4 placeholder:text-gray-400"
                 >
                   <option value="">Select</option>
                   <option value="Male">Male</option>
@@ -311,7 +311,7 @@ export default function SignUpPage() {
                   onChange={handleChange}
                   placeholder="Password"
                   required
-                  className="border border-gray-300 bg-gray-100 mb-3 p-2 w-full md:w-[410px] rounded-full pl-4 placeholder:text-gray-400"
+                  className="border border-gray-300 bg-gray-100 mb-3 p-2 w-5/6 md:w-[410px] rounded-full pl-4 placeholder:text-gray-400"
                 />
                 <div className="flex gap-4 mt-2">
                   <button
@@ -356,7 +356,7 @@ export default function SignUpPage() {
                       required: true,
                     }}
                     containerClass="w-full"
-                    inputClass="border p-2 w-full rounded-full"
+                    inputClass="border p-2 w-5/6 rounded-full"
                   />
                 </div>
                 <div className="flex gap-4 mt-4">

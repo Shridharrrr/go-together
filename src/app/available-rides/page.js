@@ -68,6 +68,7 @@ const AvailableRides = () => {
   return (
     <div className="h-screen bg-slate-900 overflow-y-auto">
       <Navbar />
+      <h2 className="text-3xl font-semibold text-white pl-4">All Rides :</h2>
       <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {rideDetails.map((ride) => {
           const driver = userDetails.find((user) => user.uid === ride.driverId);
