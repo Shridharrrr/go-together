@@ -21,7 +21,7 @@ export default function SignUpPage() {
     lastname: "",
     email: "",
     password: "",
-    phone: "",
+    phone: " ",
     age: "",
     gender: "",
   });
