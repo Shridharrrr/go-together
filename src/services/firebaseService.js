@@ -72,6 +72,7 @@ export const handleCreateRide = async (
   date,
   time,
   seats,
+  mileage,
   fromPosition,
   toPosition,
   distance,
@@ -80,13 +81,14 @@ export const handleCreateRide = async (
   setDate,
   setTime,
   setSeats,
+  setMileage,
   setFromPosition,
   setToPosition,
   setRouteCoords
 ) => {
   e.preventDefault();
 
-  if (!from || !to || !date || !time || !seats) {
+  if (!from || !to || !date || !time || !seats || !mileage) {
     alert("Please fill all fields!");
     return;
   }
@@ -108,7 +110,7 @@ export const handleCreateRide = async (
 
     const userInfo = userDoc.data();
 
-    const price = Math.round((((distance/15)*103.50)/seats),2);
+    const price = Math.round((((distance/mileage)*103.50)/seats),2);
 
 
     const docRef = await addDoc(collection(db, "availableRides"), {
@@ -117,6 +119,7 @@ export const handleCreateRide = async (
       date,
       time,
       seats: parseInt(seats),
+      mileage : parseInt(mileage),
       driverId: user.uid,
       fromCoords: fromPosition,
       toCoords: toPosition,
@@ -147,6 +150,7 @@ export const handleCreateRide = async (
     setDate("");
     setTime("");
     setSeats("");
+    setMileage("");
     setFromPosition(null);
     setToPosition(null);
     setRouteCoords([]);

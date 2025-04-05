@@ -43,6 +43,7 @@ export default function CreateRide() {
   const [routeCoords, setRouteCoords] = useState([]);
   const [showMap, setShowMap] = useState(false);
   const [distance, setDistance] = useState(0);
+  const [mileage, setMileage] = useState("");
 
   const handleSelect = (place, setLocation, setPosition, setSuggestions) => {
     setLocation(place.display_name);
@@ -95,7 +96,7 @@ export default function CreateRide() {
         transition={Bounce}
       />
       <div className="flex flex-col lg:flex-row pb-4 px-4">
-        <div className="w-full lg:w-1/2 flex flex-col items-center p-4">
+        <div className="w-full lg:w-1/2 flex flex-col items-center px-4 pb-4">
           <div className="mb-6 flex flex-col items-center justify-center h-full w-full lg:w-5/6 bg-slate-800 py-8 rounded-2xl border-dashed border-2">
             <div className="flex mb-5">
               <h2 className="text-4xl lg:text-5xl font-bold text-white ml-1">
@@ -111,6 +112,7 @@ export default function CreateRide() {
                   date,
                   time,
                   seats,
+                  mileage,
                   fromPosition,
                   toPosition,
                   distance,
@@ -119,6 +121,7 @@ export default function CreateRide() {
                   setDate,
                   setTime,
                   setSeats,
+                  setMileage,
                   setFromPosition,
                   setToPosition,
                   setRouteCoords
@@ -213,6 +216,14 @@ export default function CreateRide() {
                 placeholder="Available Seats"
                 value={seats}
                 onChange={(e) => setSeats(e.target.value)}
+                className="p-2 border-2 rounded-full bg-gray-800 text-white w-full pl-4"
+              />
+
+              <input
+                type="number"
+                placeholder="Mileage of Vehicle"
+                value={mileage}
+                onChange={(e) => setMileage(e.target.value)}
                 className="p-2 border-2 rounded-full bg-gray-800 text-white w-full pl-4"
               />
 
