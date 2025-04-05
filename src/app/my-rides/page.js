@@ -73,8 +73,8 @@ const MyRides = () => {
   return (
     <div className="bg-slate-900 h-screen overflow-y-auto">
       <Navbar/>
-      <h2 className="text-3xl font-semibold text-white pl-4">My Rides :</h2>
-    <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <h2 className="text-3xl font-semibold text-white pl-6">My Rides :</h2>
+    <div className="pl-6 p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
   {loading ? (
     
     <p className="text-center text-white">Loading ride requests...</p>

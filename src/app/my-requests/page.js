@@ -35,8 +35,8 @@ const MyRequests = () => {
   return (
     <div className="h-screen bg-slate-900 overflow-y-auto">
       <Navbar />
-      <h2 className="text-3xl font-semibold text-white pl-4">My Requests :</h2>
-      <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <h2 className="text-3xl font-semibold text-white pl-6">My Requests :</h2>
+      <div className="pl-6 p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {requests.length > 0 ? (
           requests.map((req) => (
             <Card key={req.id} className="w-full bg-slate-800">

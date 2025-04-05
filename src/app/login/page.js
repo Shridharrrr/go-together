@@ -45,7 +45,7 @@ export default function LoginPage() {
       router.push("/find-ride");
     } catch (err) {
       console.error(err);
-      setError(err.message);
+      setError("Invalid credentials");
     } finally {
       setIsLoading(false);
     }
