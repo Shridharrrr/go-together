@@ -34,7 +34,7 @@ export const fetchSuggestions = async (query, setSuggestions) => {
   }
 };
 
-export const fetchRouteFindRide = async (fromPosition, toPosition, setRouteCoords, findMatchingRides, setDistance) => {
+export const fetchRouteFindRide = async (fromPosition, toPosition, setRouteCoords, fetchMatchingRides) => {
   if (fromPosition && toPosition) {
     const res = await fetch(
       `https://router.project-osrm.org/route/v1/driving/${fromPosition[1]},${fromPosition[0]};${toPosition[1]},${toPosition[0]}?overview=full&geometries=geojson`
@@ -44,7 +44,7 @@ export const fetchRouteFindRide = async (fromPosition, toPosition, setRouteCoord
       const route = data.routes[0];
       const coords = route.geometry.coordinates.map(([lon, lat]) => [lat, lon]);
       setRouteCoords(coords);
-      findMatchingRides(coords);
+      fetchMatchingRides(coords);
     }
   }
 };

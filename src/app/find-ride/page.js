@@ -1,14 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
-import {
-  fetchAvailableRides,
-  requestRide,
-  fetchUserRequests,
-  saveRideRequest,
-  fetchSuggestions,
-  fetchRouteFindRide,
-} from "@/services/firebaseService";
+import { findMatchingRides ,requestRide, fetchUserRequests, saveRideRequest, fetchSuggestions, fetchRouteFindRide,} from "@/services/firebaseService";
 import { MapContainer, TileLayer, Marker, Polyline } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
@@ -45,9 +38,9 @@ export default function FindRide() {
     setSuggestions([]);
   };
 
-  const findMatchingRides = async () => {
+  const fetchMatchingRides = async (coords) => {
     setIsLoading(true);
-    const matchingRides = await fetchAvailableRides();
+    const matchingRides = await findMatchingRides(coords);
     setAvailableRides(matchingRides);
     setIsLoading(false);
   };
@@ -71,7 +64,7 @@ export default function FindRide() {
       fromPosition,
       toPosition,
       setRouteCoords,
-      findMatchingRides
+      fetchMatchingRides,
     ).finally(() => setIsLoading(false));
   }, [fromPosition, toPosition]);
 
@@ -84,7 +77,7 @@ export default function FindRide() {
       const requested = {};
 
       userRequests.forEach(({ rideId }) => {
-        requested[rideId] = true; // Mark the ride as requested
+        requested[rideId] = true; 
       });
 
       setRequestedRides(requested);
