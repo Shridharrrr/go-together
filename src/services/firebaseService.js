@@ -171,8 +171,8 @@ export const findMatchingRides = async (route) => {
   return rides.filter((ride) =>
     route.some(
       (coord) =>
-        Math.abs(coord[0] - ride.fromCoords[0]) < 0.05 &&
-        Math.abs(coord[1] - ride.fromCoords[1]) < 0.05
+        Math.abs(coord[0] - ride.fromCoords[0]) < 0.08 &&
+        Math.abs(coord[1] - ride.fromCoords[1]) < 0.08
     )
   );
 };

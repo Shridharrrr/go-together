@@ -96,11 +96,11 @@ export default function CreateRide() {
         transition={Bounce}
       />
       <div className="flex flex-col lg:flex-row pb-4 px-4">
-        <div className="w-full lg:w-1/2 flex flex-col items-center px-4 pb-4">
-          <div className="mb-6 flex flex-col items-center justify-center h-full w-full lg:w-5/6 bg-slate-800 py-8 rounded-2xl border-dashed border-2">
+        <div className="w-full lg:w-1/2 flex flex-col items-center">
+          <div className="mb-6 flex flex-col items-center justify-center h-[520px] w-full lg:w-5/6 bg-slate-800 py-8 rounded-2xl border-dashed border-2">
             <div className="flex mb-5">
               <h2 className="text-4xl lg:text-5xl font-bold text-white ml-1">
-                Create A Ride!
+                Create a ride!
               </h2>
             </div>
             <form
@@ -127,7 +127,7 @@ export default function CreateRide() {
                   setRouteCoords
                 )
               }
-              className="flex flex-col space-y-4 w-5/6 lg:w-[450px]"
+              className="flex flex-col space-y-4 w-5/6 lg:w-3/4"
             >
               <div className="relative">
                 <input
@@ -195,7 +195,8 @@ export default function CreateRide() {
                 )}
               </div>
 
-              <input
+                <div className="flex gap-2">
+                <input
                 type="date"
                 value={date}
                 placeholder="Date"
@@ -210,6 +211,8 @@ export default function CreateRide() {
                 onChange={(e) => setTime(e.target.value)}
                 className="p-2 border-2 rounded-full bg-gray-800 text-white w-full pl-4"
               />
+                </div>
+              
 
               <input
                 type="number"
@@ -238,11 +241,11 @@ export default function CreateRide() {
         </div>
 
         {/* Map Section */}
-        <div className="hidden w-full lg:w-1/2 h-[560px] z-10 lg:flex flex-col justify-center p-4">
+        <div className="hidden w-full lg:w-1/2 h-[560px] z-10 lg:flex flex-col items-center justify-center">
           <MapContainer
             center={[15.33, 74.05]}
             zoom={10}
-            className="w-full h-full rounded-lg border"
+            className="w-5/6 h-full rounded-lg border"
           >
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
             {fromPosition && (
@@ -272,7 +275,7 @@ export default function CreateRide() {
         {/* Map Overlay for Mobile */}
         {showMap && (
           <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex justify-center items-center">
-            <div className="z-20 w-3/4 h-3/4 lg:w-1/2 lg:h-[560px] relative">
+            <div className="z-20 w-3/4 h-3/4 lg:w-1/2 lg:h-[520px] relative">
               <MapContainer
                 center={[15.33, 74.05]}
                 zoom={10}

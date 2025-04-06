@@ -91,11 +91,11 @@ export default function FindRide() {
     <div className="min-h-screen bg-slate-900">
       <Navbar />
       <div className="flex pb-4 px-4 ">
-        <div className="w-full md:w-1/2 flex flex-col items-center p-4">
-          <div className="mb-6 flex flex-col h-[300px] items-center justify-center border-2 border-dashed w-full bg-slate-800 py-8 rounded-xl ">
+        <div className="w-full md:w-1/2 flex flex-col items-center ">
+          <div className="mb-6 flex flex-col h-[300px] items-center justify-center border-2 border-dashed w-full lg:w-5/6 bg-slate-800 py-8 rounded-xl ">
             <div className="flex  mb-5">
               <h2 className="text-4xl lg:text-5xl  font-bold text-white ml-1">
-                Find Your Ride!
+                Find a ride!
               </h2>
             </div>
 
@@ -244,11 +244,11 @@ export default function FindRide() {
           )}
         </div>
 
-        <div className="hidden w-1/2 h-[560px] z-10 md:flex flex-col justify-center p-4">
+        <div className="hidden w-full lg:w-1/2 h-[560px] z-10 lg:flex flex-col items-center justify-center">
           <MapContainer
             center={[15.33, 74.05]}
             zoom={10}
-            className="w-full h-full rounded-lg border"
+            className="w-5/6 h-full rounded-lg border"
           >
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
             {fromPosition && (
