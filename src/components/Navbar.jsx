@@ -6,7 +6,7 @@ import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "@/config/firebase";
 import { deleteCookie } from "cookies-next";
 import { usePathname } from "next/navigation";
-import { Menu, X } from "lucide-react";
+import { Car, Menu, X } from "lucide-react";
 
 export default function Navbar() {
   const [user, setUser] = useState(null);
@@ -49,7 +49,7 @@ export default function Navbar() {
 
   return (
     <nav className="bg-slate-900 text-white p-3 py-6 mb-6 flex justify-between items-center relative z-50">
-      <h1 className="text-2xl font-bold ml-3 text-indigo-400"><span className="text-white">Go</span>Together</h1>
+      <h1 className="flex items-center text-2xl font-bold ml-3 text-indigo-500"><span className="text-white">Go</span>Together&nbsp; <Car size={32} color="#ffffff" strokeWidth={1.5} /></h1>
 
       {/* Desktop Navigation */}
       <div className="hidden lg:flex gap-4 mr-3">
