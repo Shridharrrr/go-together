@@ -36,7 +36,7 @@ export default function HomePage() {
           <h4 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white leading-tight">
             Let's travel with{" "}
             <span className="text-green-400 font-bold text-5xl md:text-6xl lg:text-7xl">
-              GoTogether!
+              TripMate!
             </span>
           </h4>
           <button
