@@ -2,78 +2,89 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { User } from "lucide-react";
-import {
-  fetchAvailableRides,
-  fetchUserInfo,
-  requestRide,
-  fetchUserRequests,
-  saveRideRequest,
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { User, CarFront } from "lucide-react";
+import { 
+  fetchAvailableRides, 
+  fetchUserInfo, 
+  requestRide, 
+  fetchUserRequests, 
+  saveRideRequest 
 } from "@/services/firebaseService";
 import Navbar from "@/components/Navbar";
 
 const AvailableRides = () => {
-  const [rideDetails, setRideDetails] = useState([]);
-  const [userDetails, setUserDetails] = useState([]);
-  const [showDriverInfo, setShowDriverInfo] = useState({});
-  const [requestedRides, setRequestedRides] = useState({});
+  // State management
+  const [rides, setRides] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [expandedDriverCards, setExpandedDriverCards] = useState({});
+  const [userRequests, setUserRequests] = useState({});
   const { currentUser } = useAuth();
 
+  // Fetch data on component mount
   useEffect(() => {
-    const getDetails = async () => {
-      const rides = await fetchAvailableRides();
-      const users = await fetchUserInfo();
+    const loadData = async () => {
+      const [availableRides, userData] = await Promise.all([
+        fetchAvailableRides(),
+        fetchUserInfo()
+      ]);
 
-      setRideDetails(rides);
-      setUserDetails(users);
-      setShowDriverInfo(
-        Object.fromEntries(rides.map((ride) => [ride.id, false]))
+      setRides(availableRides);
+      setUsers(userData);
+      
+      // Initialize all cards to show ride info by default
+      setExpandedDriverCards(
+        Object.fromEntries(availableRides.map(ride => [ride.id, false]))
       );
 
+      // Load user's ride requests if logged in
       if (currentUser) {
-        const userRequests = await fetchUserRequests(currentUser.uid);
-        const requestedMap = Object.fromEntries(
-          userRequests.map((req) => [req.rideId, true])
+        const requests = await fetchUserRequests(currentUser.uid);
+        setUserRequests(
+          Object.fromEntries(requests.map(req => [req.rideId, true]))
         );
-        setRequestedRides(requestedMap);
       }
     };
 
-    getDetails();
+    loadData();
   }, [currentUser]);
 
-  const toggleDriverInfo = (rideId) => {
-    setShowDriverInfo((prev) => ({ ...prev, [rideId]: !prev[rideId] }));
+  const toggleCardView = (rideId) => {
+    setExpandedDriverCards(prev => ({ 
+      ...prev, 
+      [rideId]: !prev[rideId] 
+    }));
   };
 
-  const handleRequestRide = async (ride) => {
-    setRequestedRides((prev) => ({ ...prev, [ride.id]: true }));
+  const handleRideRequest = async (ride) => {
+    // Optimistically update UI
+    setUserRequests(prev => ({ ...prev, [ride.id]: true }));
 
     try {
-      await requestRide(ride, currentUser, userDetails);
+      await requestRide(ride, currentUser, users);
       await saveRideRequest(currentUser.uid, ride.id);
     } catch (error) {
-      console.error("Ride request failed:", error);
-      setRequestedRides((prev) => ({ ...prev, [ride.id]: false }));
+      console.error("Request failed:", error);
+      // Revert UI if request fails
+      setUserRequests(prev => ({ ...prev, [ride.id]: false }));
     }
   };
+
+  // Helper function to get driver info
+  const getDriver = (ride) => users.find(user => user.uid === ride.driverId);
 
   return (
     <div className="h-screen bg-slate-900 overflow-y-auto">
       <Navbar />
-      <h2 className="text-3xl font-semibold text-white pl-6">All Rides :</h2>
+      
+      <h2 className="text-3xl font-semibold text-white pl-6">All Rides:</h2>
+      
       <div className="pl-6 p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {rideDetails.map((ride) => {
-          const driver = userDetails.find((user) => user.uid === ride.driverId);
-          const isDriver = currentUser?.uid === ride.driverId;
-          const isRequested = requestedRides[ride.id];
+        {rides.map(ride => {
+          const driver = getDriver(ride);
+          const isCurrentUserDriver = currentUser?.uid === ride.driverId;
+          const isAlreadyRequested = userRequests[ride.id];
+          const showDriverDetails = expandedDriverCards[ride.id];
 
           return (
             <Card key={ride.id} className="w-full bg-slate-800">
@@ -84,66 +95,50 @@ const AvailableRides = () => {
                   </h4>
                 </CardTitle>
               </CardHeader>
+
               <CardContent>
-                {!showDriverInfo[ride.id] ? (
+                {showDriverDetails ? (
+                  // Driver information view
+                  <>
+                    <p className="text-md text-white">Driver: {driver?.firstname} {driver?.lastname}</p>
+                    <p className="text-md text-white">Age: {driver?.age}</p>
+                    <p className="text-md text-white">Gender: {driver?.gender}</p>
+                    <p className="text-md text-white">Contact: {driver?.phone}</p>
+                  </>
+                ) : (
+                  // Ride information view
                   <>
                     <p className="text-md text-white">Date: {ride.date}</p>
                     <p className="text-md text-white">Time: {ride.time}</p>
-                    <p className="text-md text-white">
-                      Seats Available: {ride.seats}
-                    </p>
-                    <p className="text-md text-white">
-                        Charges : {ride.price} Rs
-                      </p>
-                    
+                    <p className="text-md text-white">Seats: {ride.seats}</p>
+                    <p className="text-md text-white">Price: {ride.price} Rs</p>
                   </>
-                ) : (
-                  driver && (
-                    <>
-                      <p className="text-md text-white">Age: {driver.age}</p>
-                      <p className="text-md text-white">
-                        Gender: {driver.gender}
-                      </p>
-                      <p className="text-md text-white">
-                        Contact No: {driver.phone}
-                      </p>
-                      <p className="text-md text-white">
-                      Driver Name:{" "}
-                      {driver
-                        ? `${driver.firstname} ${driver.lastname}`
-                        : "Unknown"}
-                    </p>
-                    </>
-                  )
                 )}
               </CardContent>
+
               <CardFooter className="flex justify-between">
                 <button
-                  className={`
-      px-4 py-3 rounded-full 
-      ${
-        isDriver
-          ? "outline-indigo-500 bg-transparent outline-2 outline text-indigo-500" // Blue for "Your Ride"
-          : isRequested
-          ? "bg-gray-400 text-white cursor-not-allowed" // Gray for "Requested"
-          : "bg-green-500 text-white hover:bg-green-600 active:bg-green-700" // Green for "Request Ride"
-      }
-    `}
-                  onClick={() => handleRequestRide(ride)}
-                  disabled={isRequested || isDriver || ride.seats <= 0}
+                  className={`px-4 py-3 rounded-full ${
+                    isCurrentUserDriver
+                      ? "outline-indigo-500 bg-transparent outline-2 outline text-indigo-500"
+                      : isAlreadyRequested
+                      ? "bg-gray-400 text-white cursor-not-allowed"
+                      : "bg-green-500 text-white hover:bg-green-600 active:bg-green-700"
+                  }`}
+                  onClick={() => handleRideRequest(ride)}
+                  disabled={isAlreadyRequested || isCurrentUserDriver || ride.seats <= 0}
                 >
-                  {isDriver
-                    ? "Your Ride"
-                    : isRequested
-                    ? "Requested"
-                    : "Request Ride"}
+                  {isCurrentUserDriver ? "Your Ride" : isAlreadyRequested ? "Requested" : "Request Ride"}
                 </button>
+
                 <button
                   className="bg-gray-200 px-4 py-3 rounded-full hover:bg-gray-300 flex items-center"
-                  onClick={() => toggleDriverInfo(ride.id)}
+                  onClick={() => toggleCardView(ride.id)}
                 >
-                  {showDriverInfo[ride.id] ? (
-                    "Ride Info"
+                  {showDriverDetails ? (
+                    <>
+                      <CarFront className="mr-2 h-6 w-4" /> Ride Info
+                    </>
                   ) : (
                     <>
                       <User className="mr-2 h-4 w-4" /> Driver Info

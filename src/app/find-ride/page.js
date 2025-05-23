@@ -1,13 +1,22 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { findMatchingRides ,requestRide, fetchUserRequests, saveRideRequest, fetchSuggestions, fetchRouteFindRide,} from "@/services/firebaseService";
+import {
+  findMatchingRides,
+  requestRide,
+  fetchUserRequests,
+  saveRideRequest,
+  fetchSuggestions,
+  fetchRouteFindRide,
+  fetchUserInfo,
+} from "@/services/firebaseService";
 import { MapContainer, TileLayer, Marker, Polyline } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import markerIconPng from "leaflet/dist/images/marker-icon.png";
 import markerShadowPng from "leaflet/dist/images/marker-shadow.png";
 import Navbar from "@/components/Navbar";
+import { User, CarFront } from "lucide-react";
 
 const customMarkerIcon = new L.Icon({
   iconUrl: markerIconPng.src,
@@ -31,6 +40,8 @@ export default function FindRide() {
   const [requestedRides, setRequestedRides] = useState({});
   const [showMap, setShowMap] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [userDetails, setUserDetails] = useState([]);
+  const [expandedDriverCards, setExpandedDriverCards] = useState({});
 
   const handleSelect = (place, setLocation, setPosition, setSuggestions) => {
     setLocation(place.display_name);
@@ -58,34 +69,53 @@ export default function FindRide() {
     }
   };
 
+  const toggleDriverInfo = (rideId) => {
+    setExpandedDriverCards((prev) => ({ ...prev, [rideId]: !prev[rideId] }));
+  };
+
   useEffect(() => {
     setIsLoading(true);
     fetchRouteFindRide(
       fromPosition,
       toPosition,
       setRouteCoords,
-      fetchMatchingRides,
+      fetchMatchingRides
     ).finally(() => setIsLoading(false));
   }, [fromPosition, toPosition]);
 
   useEffect(() => {
-    const fetchRequestedRides = async () => {
-      if (!currentUser) return;
-
+    const fetchInitialData = async () => {
       setIsLoading(true);
-      const userRequests = await fetchUserRequests(currentUser.uid);
-      const requested = {};
+      try {
+        // Fetch user requests if logged in
+        if (currentUser) {
+          const userRequests = await fetchUserRequests(currentUser.uid);
+          const requested = {};
+          userRequests.forEach(({ rideId }) => {
+            requested[rideId] = true;
+          });
+          setRequestedRides(requested);
+        }
 
-      userRequests.forEach(({ rideId }) => {
-        requested[rideId] = true; 
-      });
+        // Fetch all user details for driver info
+        const users = await fetchUserInfo();
+        setUserDetails(users);
 
-      setRequestedRides(requested);
-      setIsLoading(false);
+        // Initialize driver info toggles
+        setExpandedDriverCards(
+          Object.fromEntries(availableRides.map((ride) => [ride.id, false]))
+        );
+      } finally {
+        setIsLoading(false);
+      }
     };
 
-    fetchRequestedRides();
-  }, [currentUser]);
+    fetchInitialData();
+  }, [currentUser, availableRides]);
+
+  const getDriverInfo = (driverId) => {
+    return userDetails.find((user) => user.uid === driverId);
+  };
 
   return (
     <div className="min-h-screen bg-slate-900">
@@ -195,47 +225,95 @@ export default function FindRide() {
                       Matching Rides:
                     </h3>
                     <ul>
-                      {availableRides.map((ride) => (
-                        <div
-                          key={ride.id}
-                          className="border-2 border-indigo-500 border-dashed p-6 rounded-xl bg-gray-800 text-white shadow-md mb-4"
-                        >
-                          <h4 className="font-bold">
-                            <span className="text-yellow-300">{ride.from}</span>{" "}
-                            → <span>{ride.to}</span>
-                          </h4>
-                          <p>Date: {ride.date}</p>
-                          <p>Time: {ride.time}</p>
-                          <p>Seats Available: {ride.seats}</p>
+                      {availableRides.map((ride) => {
+                        const driver = getDriverInfo(ride.driverId);
+                        const showDriverInfo = expandedDriverCards[ride.id];
 
-                          <button
-                            onClick={() => handleRequestRide(ride)}
-                            className={`relative group mt-3  w-[120px] text-white p-2 rounded-xl transition-all overflow-hidden" ${
-                              requestedRides[ride.id] ||
-                              ride.seats <= 0 ||
-                              ride.driverId === currentUser?.uid
-                                ? "bg-gray-400"
-                                : "bg-green-500 hover:bg-green-600 active:bg-green-700"
-                            }`}
-                            disabled={
-                              requestedRides[ride.id] ||
-                              ride.seats <= 0 ||
-                              ride.driverId === currentUser?.uid
-                            }
+                        return (
+                          <div
+                            key={ride.id}
+                            className="border-2 border-indigo-500 border-dashed p-6 rounded-xl bg-gray-800 text-white shadow-md mb-4"
                           >
-                            <span className="group-hover:opacity-0 transition-opacity duration-300">
-                              {ride.driverId === currentUser?.uid
-                                ? "Your Ride"
-                                : requestedRides[ride.id]
-                                ? "Request Sent"
-                                : "Book Ride"}
-                            </span>
-                            <span className="absolute inset-0 flex items-center text-2xl mb-1 justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                              ✓
-                            </span>
-                          </button>
-                        </div>
-                      ))}
+                            {!showDriverInfo ? (
+                              <>
+                                <h4 className="font-bold">
+                                  <span className="text-yellow-300">
+                                    {ride.from}
+                                  </span>{" "}
+                                  → <span>{ride.to}</span>
+                                </h4>
+                                <p>Date: {ride.date}</p>
+                                <p>Time: {ride.time}</p>
+                                <p>Seats Available: {ride.seats}</p>
+                                <p>Price: {ride.price} Rs</p>
+                              </>
+                            ) : (
+                              driver && (
+                                <>
+                                  <h4 className="font-bold">
+                                    <span className="text-yellow-300">
+                                      {ride.from}
+                                    </span>{" "}
+                                    → <span>{ride.to}</span>
+                                  </h4>
+                                  <p>
+                                    Driver: {driver.firstname} {driver.lastname}
+                                  </p>
+                                  <p>Age: {driver.age}</p>
+                                  <p>Gender: {driver.gender}</p>
+                                  <p>Contact: {driver.phone}</p>
+                                </>
+                              )
+                            )}
+
+                            <div className="flex justify-between mt-3">
+                              <button
+                                onClick={() => handleRequestRide(ride)}
+                                className={`relative group w-[120px] text-white p-2 rounded-xl transition-all overflow-hidden ${
+                                  requestedRides[ride.id] ||
+                                  ride.seats <= 0 ||
+                                  ride.driverId === currentUser?.uid
+                                    ? "bg-gray-400"
+                                    : "bg-green-500 hover:bg-green-600 active:bg-green-700"
+                                }`}
+                                disabled={
+                                  requestedRides[ride.id] ||
+                                  ride.seats <= 0 ||
+                                  ride.driverId === currentUser?.uid
+                                }
+                              >
+                                <span className="group-hover:opacity-0 transition-opacity duration-300">
+                                  {ride.driverId === currentUser?.uid
+                                    ? "Your Ride"
+                                    : requestedRides[ride.id]
+                                    ? "Request Sent"
+                                    : "Book Ride"}
+                                </span>
+                                <span className="absolute inset-0 flex items-center text-2xl mb-1 justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                  ✓
+                                </span>
+                              </button>
+
+                              <button
+                                onClick={() => toggleDriverInfo(ride.id)}
+                                className="bg-gray-200 px-4 py-2 rounded-full hover:bg-gray-300 flex items-center text-black"
+                              >
+                                {showDriverInfo ? (
+                                  <>
+                                    <CarFront className="mr-2 h-6 w-4" /> Ride
+                                    Info
+                                  </>
+                                ) : (
+                                  <>
+                                    <User className="mr-2 h-4 w-4" /> Driver
+                                    Info
+                                  </>
+                                )}
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </ul>
                   </>
                 )}
