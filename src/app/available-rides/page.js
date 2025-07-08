@@ -100,10 +100,10 @@ const AvailableRides = () => {
                 {showDriverDetails ? (
                   // Driver information view
                   <>
-                    <p className="text-md text-white">Driver: {driver?.firstname} {driver?.lastname}</p>
+                    <p className="text-md text-white">Driver: {driver?.firstname.charAt(0).toUpperCase() + driver?.firstname.slice(1)} {driver?.lastname.charAt(0).toUpperCase() + driver?.lastname.slice(1)}</p>
                     <p className="text-md text-white">Age: {driver?.age}</p>
                     <p className="text-md text-white">Gender: {driver?.gender}</p>
-                    <p className="text-md text-white">Contact: {driver?.phone}</p>
+                    <p className="text-md text-white">Contact: {"+" + driver?.phone.slice(0,2) + " " + driver?.phone.slice(2)}</p>
                   </>
                 ) : (
                   // Ride information view

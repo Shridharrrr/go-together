@@ -257,11 +257,11 @@ export default function FindRide() {
                                     → <span>{ride.to}</span>
                                   </h4>
                                   <p>
-                                    Driver: {driver.firstname} {driver.lastname}
+                                    Driver: {driver.firstname.charAt(0).toUpperCase() + driver.firstname.slice(1)} {driver.lastname.charAt(0).toUpperCase() + driver.lastname.slice(1)}
                                   </p>
                                   <p>Age: {driver.age}</p>
                                   <p>Gender: {driver.gender}</p>
-                                  <p>Contact: {driver.phone}</p>
+                                  <p>Contact: {"+" + driver.phone.slice(0,2) + " " + driver.phone.slice(2)}</p>
                                 </>
                               )
                             )}
