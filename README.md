@@ -20,7 +20,7 @@ Go Together is a smart carpooling platform that connects drivers and passengers 
 
 1. Clone the repository:  
    ```sh
-   git clone https://github.com/yourusername/go-together.git
+   git clone https://github.com/Shridharrrr/go-together.git
    cd go-together
    ```  
 
